@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"overtube/ui"
+)
 
 func main() {
-    fmt.Println("hello world")
+	var uiDone = make(chan bool)
+	go ui.CreateHomeWindow(uiDone)
+	<-uiDone
 }
