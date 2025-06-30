@@ -7,6 +7,14 @@ const (
 	PlatformTypeTwitch  PlatformType = "twitch"
 )
 
+type CustomError struct {
+	message string
+}
+
+func (e *CustomError) Error() string {
+	return e.message
+}
+
 const ChatStreamMessageBufferSize = 200
 
 type ChatStreamMessage struct {

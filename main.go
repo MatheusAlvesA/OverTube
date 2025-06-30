@@ -31,14 +31,14 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 			var err error = nil
 			chatStream, err = chat_stream.ConnectToYoutubeChat(v.Channel)
 			if err != nil {
-				log.Fatalln("Failed to connect to YouTube chat: ", err)
+				log.Println("Failed to connect to YouTube chat: ", err)
 			} else {
 				go handleChatStreamMessages(chatStream)
 			}
 		case ui.UIEventExit:
 			log.Println("User exited")
 		default:
-			log.Fatalln("Unknown event type: ", reflect.TypeOf(event))
+			log.Println("Unknown event type: ", reflect.TypeOf(event))
 		}
 	}
 
