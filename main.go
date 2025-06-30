@@ -55,7 +55,7 @@ func handleChatStreamMessages(chatStream chat_stream.ChatStreamCon) {
 			log.Println("Chat stream messages channel closed")
 			break
 		}
-		log.Printf("Received message from %s on %s: %s\n", msg.Name, msg.Platform, msg.Message)
+		log.Printf("%s: %s\n", msg.Name, msg.Message)
 	}
 }
 

@@ -21,7 +21,7 @@ type ChatStreamMessage struct {
 	Platform  PlatformType
 	Name      string
 	Message   string
-	Timestamp string
+	Timestamp int64
 }
 
 type ChatStreamCon interface {
@@ -31,8 +31,10 @@ type ChatStreamCon interface {
 }
 
 type YTChatStreamCon struct {
-	ChannelID string
-	stream    chan ChatStreamMessage
+	ChannelID         string
+	ContinuationToken string
+	LastStreamUpdate  int64
+	stream            chan ChatStreamMessage
 }
 
 func (c *YTChatStreamCon) IsConnected() bool {

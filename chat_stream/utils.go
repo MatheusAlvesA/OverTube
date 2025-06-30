@@ -1,38 +1,46 @@
 package chat_stream
 
 import (
+	"fmt"
 	"log"
 	"reflect"
+	"strconv"
 )
 
-func GetDeepMapValue(m map[string]any, keys []any) (any, bool) {
+func logIfNotSilent(message string, silent bool) {
+	if !silent {
+		log.Println(message)
+	}
+}
+
+func GetDeepMapValue(m map[string]any, keys []any, silent bool) (any, bool) {
 	var value any = m
 	for _, key := range keys {
 		if reflect.TypeOf(key) == reflect.TypeOf("") {
 			if vTest, ok := value.(map[string]any); !ok {
-				log.Println("[GetDeepMapValue] Element is not a map: ", reflect.TypeOf(vTest), " for key: ", key)
+				logIfNotSilent("[GetDeepMapValue] Element is not a map: "+fmt.Sprintf("%T", vTest)+" for key: "+key.(string), silent)
 				return nil, false
 			}
 			if _, ok := value.(map[string]any)[key.(string)]; !ok {
-				log.Println("[GetDeepMapValue] Key not found in map:", key)
+				logIfNotSilent("[GetDeepMapValue] Key not found in map: "+key.(string), silent)
 				return nil, false
 			}
 			value = value.(map[string]any)[key.(string)]
 		} else if reflect.TypeOf(key) == reflect.TypeOf(1) {
 			if vTest, ok := value.([]any); !ok {
-				log.Println("[GetDeepMapValue] Element is not a array: ", reflect.TypeOf(vTest), " for key: ", key)
+				logIfNotSilent("[GetDeepMapValue] Element is not a array: "+fmt.Sprintf("%T", vTest)+" for key: "+key.(string), silent)
 				return nil, false
 			}
 			if key.(int) < 0 {
 				key = len(value.([]any)) + key.(int) // Handle negative indices
 			}
 			if key.(int) >= len(value.([]any)) {
-				log.Println("[GetDeepMapValue] Key not found in array:", key)
+				logIfNotSilent("[GetDeepMapValue] Key not found in array: "+strconv.Itoa(key.(int)), silent)
 				return nil, false
 			}
 			value = value.([]any)[key.(int)]
 		} else {
-			log.Println("[GetDeepMapValue] Key is not a valid type:", reflect.TypeOf(key))
+			logIfNotSilent("[GetDeepMapValue] Key is not a valid type:"+fmt.Sprintf("%T", key), silent)
 			return nil, false
 		}
 	}
