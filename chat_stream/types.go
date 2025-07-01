@@ -7,6 +7,13 @@ const (
 	PlatformTypeTwitch  PlatformType = "twitch"
 )
 
+type ChatStreamMessagePartType string
+
+const (
+	ChatStreamMessagePartTypeText  ChatStreamMessagePartType = "text"
+	ChatStreamMessagePartTypeEmote ChatStreamMessagePartType = "emote"
+)
+
 type CustomError struct {
 	message string
 }
@@ -17,11 +24,26 @@ func (e *CustomError) Error() string {
 
 const ChatStreamMessageBufferSize = 200
 
+type ChatStreamMessagePart struct {
+	partType    ChatStreamMessagePartType
+	text        string
+	emoteImgUrl string
+	emoteName   string
+}
+
 type ChatStreamMessage struct {
-	Platform  PlatformType
-	Name      string
-	Message   string
-	Timestamp int64
+	Platform     PlatformType
+	Name         string
+	MessageParts []ChatStreamMessagePart
+	Timestamp    int64
+}
+
+func (m *ChatStreamMessage) GetMessagePlainText() string {
+	var messageText string
+	for _, part := range m.MessageParts {
+		messageText += part.text
+	}
+	return messageText
 }
 
 type ChatStreamCon interface {

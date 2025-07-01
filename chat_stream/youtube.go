@@ -11,7 +11,12 @@ import (
 )
 
 func ConnectToYoutubeChat(channelID string) (ChatStreamCon, error) {
-	continuationToken, err := getContinuationFromURL(channelID)
+	streamUrl, err := getLiveStreamFromChannelId(channelID)
+	if err != nil {
+		return nil, err
+	}
+	log.Println("Live stream URL for channel", channelID, "is", streamUrl)
+	continuationToken, err := getContinuationFromURL(streamUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -147,23 +152,74 @@ func getMessageFromChatItem(item map[string]any, lastTimeUpdate int64) (*ChatStr
 	if !ok {
 		return nil, &CustomError{message: "Message text not found in chat item"}
 	}
-	var messageText string = ""
+	var messageParts []ChatStreamMessagePart
 	for _, messageEntry := range messagesText.([]any) {
-		text, ok := GetDeepMapValue(messageEntry.(map[string]any), []any{
-			"text",
-		}, false)
-		if !ok {
+		message, err := getMessagePartFromChatItemEntry(messageEntry.(map[string]any))
+		if err != nil {
+			log.Println("Error getting message part from chat item entry:", err)
 			continue
 		}
-		messageText = messageText + text.(string)
+		messageParts = append(messageParts, message)
+	}
+
+	if len(messageParts) == 0 {
+		return nil, &CustomError{message: "No valid message parts found in chat item"}
 	}
 
 	return &ChatStreamMessage{
-		Platform:  PlatformTypeYoutube,
-		Name:      name.(string),
-		Message:   messageText,
-		Timestamp: timestampInt,
+		Platform:     PlatformTypeYoutube,
+		Name:         name.(string),
+		MessageParts: messageParts,
+		Timestamp:    timestampInt,
 	}, nil
+}
+
+func getMessagePartFromChatItemEntry(messageEntry map[string]any) (ChatStreamMessagePart, error) {
+	text, ok := GetDeepMapValue(messageEntry, []any{
+		"text",
+	}, true)
+	if ok {
+		return ChatStreamMessagePart{
+			partType: ChatStreamMessagePartTypeText,
+			text:     text.(string),
+		}, nil
+	}
+	message := ChatStreamMessagePart{
+		partType: ChatStreamMessagePartTypeEmote,
+	}
+	emojiText, ok := GetDeepMapValue(messageEntry, []any{
+		"emoji",
+		"emojiId",
+	}, true)
+	if ok {
+		message.text = emojiText.(string)
+	}
+	emojiImg, ok := GetDeepMapValue(messageEntry, []any{
+		"emoji",
+		"image",
+		"thumbnails",
+		0,
+		"url",
+	}, true)
+	if !ok {
+		return message, &CustomError{message: "Emote image URL not found in message entry"}
+	}
+	message.emoteImgUrl = emojiImg.(string)
+	emojiName, ok := GetDeepMapValue(messageEntry, []any{
+		"emoji",
+		"shortcuts",
+		0,
+	}, true)
+	if !ok {
+		return message, &CustomError{message: "Emote name not found in message entry"}
+	}
+	message.emoteName = emojiName.(string)
+
+	if message.text == "" {
+		message.text = message.emoteName // Fallback to emote name if no text is
+	}
+
+	return message, nil
 }
 
 func getMessagesAPIResponse(continuationToken string) (map[string]any, error) {
@@ -229,8 +285,8 @@ func getContinuationFromAPIResponse(response map[string]any) (string, error) {
 	return ifreeChatContinuationToken.(string), nil
 }
 
-func getContinuationFromURL(url string) (string, error) {
-	resp, err := http.Get(url)
+func getContinuationFromURL(streamUrl string) (string, error) {
+	resp, err := http.Get(streamUrl)
 	if err != nil {
 		return "", err
 	}
@@ -262,4 +318,36 @@ func getContinuationFromAllChat(continuationToken string) (string, error) {
 	}
 
 	return getContinuationFromAPIResponse(parsed)
+}
+
+func getLiveStreamFromChannelId(channelID string) (string, error) {
+	resp, err := http.Get("https://www.youtube.com/@" + channelID)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", &CustomError{message: "Failed to fetch channel page, status code: " + strconv.Itoa(resp.StatusCode)}
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	indexOffset := 71
+	index := strings.Index(string(body), "channelFeaturedContentRenderer\":{\"items\":[{\"videoRenderer\":{\"videoId\":\"")
+	if index < 0 {
+		index = strings.Index(string(body), "\"channelVideoPlayerRenderer\":{\"videoId\":\"")
+		indexOffset = 41
+		if index < 0 {
+			return "", &CustomError{message: "Live stream data not found in response"}
+		}
+	}
+	index += indexOffset // Length of the string before the JSON data
+	endIndex := strings.Index(string(body)[index:], "\"")
+	if endIndex < 0 {
+		return "", &CustomError{message: "End of live stream code data not found"}
+	}
+
+	return ("https://www.youtube.com/watch?v=" + string(body)[index:index+endIndex]), nil
 }
