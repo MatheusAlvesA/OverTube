@@ -15,7 +15,7 @@ import (
 
 func CreateHomeWindow(uiEvents chan<- UIEvent) {
 	go func() {
-		window := new(app.Window)
+		window := &app.Window{}
 		window.Option(app.Title("OverTube"))
 		window.Option(app.MinSize(400, 300))
 		err := run(window, uiEvents)
@@ -26,12 +26,12 @@ func CreateHomeWindow(uiEvents chan<- UIEvent) {
 }
 
 func initialState() *UIState {
-	state := new(UIState)
-	state.YoutubeChannelURLEditor = new(widget.Editor)
+	state := &UIState{}
+	state.YoutubeChannelURLEditor = &widget.Editor{}
 	state.YoutubeChannelURLEditor.SingleLine = true
 	state.YoutubeChannelURLEditor.MaxLen = 60
 
-	state.YouTubeChannelClickable = new(widget.Clickable)
+	state.YouTubeChannelClickable = &widget.Clickable{}
 	return state
 }
 

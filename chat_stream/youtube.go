@@ -30,11 +30,12 @@ func ConnectToYoutubeChat(channelID string) (ChatStreamCon, error) {
 
 func generateChatStream(channelID string, continuationToken string) (ChatStreamCon, error) {
 	log.Println("Starting YouTube chat stream for channel:", channelID)
-	con := new(YTChatStreamCon)
-	con.ChannelID = channelID
-	con.stream = make(chan ChatStreamMessage, ChatStreamMessageBufferSize)
-	con.ContinuationToken = continuationToken
-	con.LastStreamUpdate = 0
+	con := &YTChatStreamCon{
+		ChannelID:         channelID,
+		stream:            make(chan ChatStreamMessage, ChatStreamMessageBufferSize),
+		ContinuationToken: continuationToken,
+		LastStreamUpdate:  0,
+	}
 	go func() {
 		for {
 			if !con.IsConnected() {
