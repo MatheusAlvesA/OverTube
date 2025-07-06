@@ -14,6 +14,10 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		origin, ok := r.Header["Origin"]
+		return ok && len(origin) == 1 && origin[0] == "http://localhost:1337"
+	},
 }
 
 type WSChatStreamServer struct {
@@ -81,7 +85,7 @@ func (s *WSChatStreamServer) handleChatStreamMessages() {
 		case msg := <-chatStream.GetMessagesChan():
 			s.conn.WriteJSON(map[string]any{
 				"type":         "msg",
-				"useName":      msg.Name,
+				"userName":     msg.Name,
 				"platform":     msg.Platform,
 				"timestamp":    msg.Timestamp,
 				"messageParts": msg.MessageParts,

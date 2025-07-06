@@ -157,7 +157,7 @@ func getMessageFromChatItem(item map[string]any, lastTimeUpdate int64) (*ChatStr
 	for _, messageEntry := range messagesText.([]any) {
 		message, err := getMessagePartFromChatItemEntry(messageEntry.(map[string]any))
 		if err != nil {
-			log.Println("Error getting message part from chat item entry:", err)
+			log.Println(err)
 			continue
 		}
 		messageParts = append(messageParts, message)
@@ -190,7 +190,10 @@ func getMessagePartFromChatItemEntry(messageEntry map[string]any) (ChatStreamMes
 	}
 	emojiText, ok := GetDeepMapValue(messageEntry, []any{
 		"emoji",
-		"emojiId",
+		"image",
+		"accessibility",
+		"accessibilityData",
+		"label",
 	}, true)
 	if ok {
 		message.Text = emojiText.(string)
@@ -199,20 +202,21 @@ func getMessagePartFromChatItemEntry(messageEntry map[string]any) (ChatStreamMes
 		"emoji",
 		"image",
 		"thumbnails",
-		0,
+		-1,
 		"url",
 	}, true)
 	if !ok {
 		return message, &CustomError{message: "Emote image URL not found in message entry"}
 	}
 	message.EmoteImgUrl = emojiImg.(string)
+
 	emojiName, ok := GetDeepMapValue(messageEntry, []any{
 		"emoji",
 		"shortcuts",
 		0,
 	}, true)
 	if !ok {
-		return message, &CustomError{message: "Emote name not found in message entry"}
+		emojiName = emojiText
 	}
 	message.EmoteName = emojiName.(string)
 
