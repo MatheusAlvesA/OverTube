@@ -1,6 +1,9 @@
 package ws_server
 
-import "overtube/chat_stream"
+import (
+	"log"
+	"overtube/chat_stream"
+)
 
 func CreateServer() *WSChatStreamServer {
 	server := &WSChatStreamServer{
@@ -8,8 +11,10 @@ func CreateServer() *WSChatStreamServer {
 		srcStreams: make([]chat_stream.ChatStreamCon, 0),
 	}
 
+	log.Println("[CreateServer] Starting WS Server")
 	if !server.Start() {
 		return nil
 	}
+	log.Println("[CreateServer] WS Server started")
 	return server
 }

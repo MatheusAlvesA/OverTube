@@ -181,19 +181,19 @@ func getMessagePartFromChatItemEntry(messageEntry map[string]any) (ChatStreamMes
 	}, true)
 	if ok {
 		return ChatStreamMessagePart{
-			partType: ChatStreamMessagePartTypeText,
-			text:     text.(string),
+			PartType: ChatStreamMessagePartTypeText,
+			Text:     text.(string),
 		}, nil
 	}
 	message := ChatStreamMessagePart{
-		partType: ChatStreamMessagePartTypeEmote,
+		PartType: ChatStreamMessagePartTypeEmote,
 	}
 	emojiText, ok := GetDeepMapValue(messageEntry, []any{
 		"emoji",
 		"emojiId",
 	}, true)
 	if ok {
-		message.text = emojiText.(string)
+		message.Text = emojiText.(string)
 	}
 	emojiImg, ok := GetDeepMapValue(messageEntry, []any{
 		"emoji",
@@ -205,7 +205,7 @@ func getMessagePartFromChatItemEntry(messageEntry map[string]any) (ChatStreamMes
 	if !ok {
 		return message, &CustomError{message: "Emote image URL not found in message entry"}
 	}
-	message.emoteImgUrl = emojiImg.(string)
+	message.EmoteImgUrl = emojiImg.(string)
 	emojiName, ok := GetDeepMapValue(messageEntry, []any{
 		"emoji",
 		"shortcuts",
@@ -214,10 +214,10 @@ func getMessagePartFromChatItemEntry(messageEntry map[string]any) (ChatStreamMes
 	if !ok {
 		return message, &CustomError{message: "Emote name not found in message entry"}
 	}
-	message.emoteName = emojiName.(string)
+	message.EmoteName = emojiName.(string)
 
-	if message.text == "" {
-		message.text = message.emoteName // Fallback to emote name if no text is
+	if message.Text == "" {
+		message.Text = message.EmoteName // Fallback to emote name if no text is
 	}
 
 	return message, nil

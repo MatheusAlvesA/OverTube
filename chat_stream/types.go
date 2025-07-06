@@ -25,10 +25,10 @@ func (e *CustomError) Error() string {
 const ChatStreamMessageBufferSize = 200
 
 type ChatStreamMessagePart struct {
-	partType    ChatStreamMessagePartType
-	text        string
-	emoteImgUrl string
-	emoteName   string
+	PartType    ChatStreamMessagePartType
+	Text        string
+	EmoteImgUrl string
+	EmoteName   string
 }
 
 type ChatStreamMessage struct {
@@ -41,7 +41,7 @@ type ChatStreamMessage struct {
 func (m *ChatStreamMessage) GetMessagePlainText() string {
 	var messageText string
 	for _, part := range m.MessageParts {
-		messageText += part.text
+		messageText += part.Text
 	}
 	return messageText
 }

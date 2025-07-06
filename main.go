@@ -4,8 +4,11 @@ import (
 	"log"
 	"overtube/chat_stream"
 	"overtube/ui"
+	"overtube/ws_server"
 	"reflect"
 )
+
+var wsServer = ws_server.CreateServer()
 
 func main() {
 	uiEventChan := make(chan ui.UIEvent)
@@ -33,7 +36,7 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 			if err != nil {
 				log.Println("Failed to connect to YouTube chat: ", err)
 			} else {
-				go handleChatStreamMessages(chatStream)
+				wsServer.AddStream(chatStream)
 			}
 		case ui.UIEventExit:
 			log.Println("User exited")
@@ -43,20 +46,6 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 	}
 
 	closeChatStream(chatStream)
-}
-
-func handleChatStreamMessages(chatStream chat_stream.ChatStreamCon) {
-	for {
-		if !chatStream.IsConnected() {
-			break
-		}
-		msg, more := <-chatStream.GetMessagesChan()
-		if !more {
-			log.Println("Chat stream messages channel closed")
-			break
-		}
-		log.Printf("%s: %s\n", msg.Name, msg.GetMessagePlainText())
-	}
 }
 
 func closeChatStream(chatStream chat_stream.ChatStreamCon) {
