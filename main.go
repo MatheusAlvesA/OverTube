@@ -4,16 +4,20 @@ import (
 	"log"
 	"overtube/chat_stream"
 	"overtube/ui"
+	"overtube/web_server"
 	"overtube/ws_server"
 	"reflect"
 )
 
 var wsServer = ws_server.CreateServer()
+var webServer = web_server.CreateServer()
 
 func main() {
 	uiEventChan := make(chan ui.UIEvent)
 	go ui.CreateHomeWindow(uiEventChan)
 	orchestrateEvents(uiEventChan)
+	wsServer.Stop()
+	webServer.Stop()
 }
 
 func orchestrateEvents(uiEventChan chan ui.UIEvent) {
