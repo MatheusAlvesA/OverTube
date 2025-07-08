@@ -71,7 +71,7 @@ func (s *WSChatStreamServer) loopChatStreamMessages() {
 			return
 		}
 		s.handleChatStreamMessages()
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 	}
 }
 

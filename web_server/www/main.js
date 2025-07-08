@@ -1,14 +1,20 @@
-var socket = null;
 function openWebSocket() {
-    socket = new WebSocket("ws://localhost:1336/ws");
-    socket.onopen = (event) => console.log("Websocket connected!");
+    const socket = new WebSocket("ws://localhost:1336/ws");
+    socket.onopen = (event) => {
+        console.log("Websocket connected!");
+        document.getElementById('alert-disconnected').style.display = 'none';
+    }
     socket.onmessage = (event) => handleNewPayload(event.data);
 
     socket.onerror = (error) => {
         console.error("WebSocket error:", error);
+        document.getElementById('alert-disconnected').style.display = 'flex';
+        setTimeout(() => openWebSocket(), 1000);
     };
     socket.onclose = (event) => {
         console.log("WebSocket connection closed:", event);
+        document.getElementById('alert-disconnected').style.display = 'flex';
+        setTimeout(() => openWebSocket(), 1000);
     };
 }
 
@@ -36,6 +42,7 @@ function deleteOldMessages() {
 
 function createMessageNode(message) {
     const container = document.createElement('div');
+    container.classList.add('message-container');
     container.appendChild(createHeaderMessageNode(message));
     container.appendChild(createBodyMessageNode(message));
     return container
@@ -43,12 +50,14 @@ function createMessageNode(message) {
 
 function createHeaderMessageNode(message) {
     const container = document.createElement('div');
+    container.classList.add('message-head-container');
     container.innerText = message.userName;
     return container
 }
 
 function createBodyMessageNode(message) {
     const container = document.createElement('div');
+    container.classList.add('message-body-container');
     message.messageParts.forEach(part => {
         if(part.PartType === "text") {
             const span = document.createElement('span');
