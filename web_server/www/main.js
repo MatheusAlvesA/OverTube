@@ -1,5 +1,8 @@
+var socket = null;
 function openWebSocket() {
-    const socket = new WebSocket("ws://localhost:1336/ws");
+    if(socket != null) return;
+
+    socket = new WebSocket("ws://localhost:1336/ws");
     socket.onopen = (event) => {
         console.log("Websocket connected!");
         document.getElementById('alert-disconnected').style.display = 'none';
@@ -9,11 +12,13 @@ function openWebSocket() {
     socket.onerror = (error) => {
         console.error("WebSocket error:", error);
         document.getElementById('alert-disconnected').style.display = 'flex';
+        socket = null;
         setTimeout(() => openWebSocket(), 1000);
     };
     socket.onclose = (event) => {
         console.log("WebSocket connection closed:", event);
         document.getElementById('alert-disconnected').style.display = 'flex';
+        socket = null;
         setTimeout(() => openWebSocket(), 1000);
     };
 }
@@ -23,7 +28,17 @@ function handleNewPayload(payload) {
     if(parsed.type === "msg") {
         handleNewMessage(parsed);
     }
+    if(parsed.type === "cmd") {
+        handleNewCommand(parsed);
+    }
 }
+
+function handleNewCommand(command) {
+    if(command.command === 'ping') {
+        socket.send(JSON.stringify({'command': 'pong'}));
+    }
+}
+
 
 function handleNewMessage(message) {
     const node = createMessageNode(message);

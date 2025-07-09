@@ -11,6 +11,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const MAX_WS_CONNS = 5
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -23,52 +25,88 @@ var upgrader = websocket.Upgrader{
 type WSChatStreamServer struct {
 	Port       uint
 	srcStreams []chat_stream.ChatStreamCon
-	conn       *websocket.Conn
+	conns      []*websocket.Conn
 	srv        *http.Server
 }
 
 func (s *WSChatStreamServer) Start() bool {
 	s.srv = &http.Server{Addr: "localhost:" + fmt.Sprintf("%d", s.Port)}
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		alreadyHandlingCon := false
-		if s.conn != nil {
-			s.conn.Close()
-			alreadyHandlingCon = true
+		if len(s.srcStreams) <= 0 {
+			log.Println("[WSChatStreamServer] Denying new connection, no chat stream live")
+			return
 		}
-		var err error
-		s.conn, err = upgrader.Upgrade(w, r, nil)
+		if len(s.conns) >= MAX_WS_CONNS {
+			log.Println("[WSChatStreamServer] Denying new connection, max connections reached")
+			return
+		}
+		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Println("[WSChatStreamServer] Fail to upgrade to WS", err)
 			return
 		}
-		if !alreadyHandlingCon {
-			go s.loopChatStreamMessages()
-		}
+		s.conns = append(s.conns, conn)
 	})
 
 	go s.srv.ListenAndServe()
+	go s.loopChatStreamMessages()
+	go s.clearOldConnections()
 
 	return true
 }
 
 func (s *WSChatStreamServer) Stop() {
-	if s.conn != nil {
-		s.conn.Close()
-		s.conn = nil
-	}
+	s.closeAllSockets()
 	if s.srv != nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		s.srv.Shutdown(ctx)
+	}
+	s.srv = nil
+}
+
+func (s *WSChatStreamServer) closeAllSockets() {
+	for _, conn := range s.conns {
+		conn.Close()
+	}
+	s.conns = []*websocket.Conn{}
+}
+
+func (s *WSChatStreamServer) clearOldConnections() {
+	for {
+		if s.srv == nil {
+			return
+		}
+		newList := []*websocket.Conn{}
+		for _, conn := range s.conns {
+			conn.WriteJSON(map[string]any{
+				"type":    "cmd",
+				"command": "ping",
+			})
+			var v map[string]any = nil
+			err := conn.ReadJSON(&v)
+			if err == nil && v != nil && v["command"] == "pong" {
+				newList = append(newList, conn)
+			} else {
+				log.Println("[WSChatStreamServer] No response from client, disconnected")
+				conn.Close()
+			}
+		}
+		s.conns = newList
+		time.Sleep(3 * time.Second)
 	}
 }
 
 func (s *WSChatStreamServer) loopChatStreamMessages() {
 	log.Println("[WSChatStreamServer] loopChatStreamMessages started")
 	for {
-		if s.conn == nil {
-			log.Println("[WSChatStreamServer] No connection live, stop handling messages")
+		if s.srv == nil {
+			log.Println("[WSChatStreamServer] No server live, stop handling messages")
 			return
+		}
+		if len(s.srcStreams) <= 0 && len(s.conns) > 0 {
+			log.Println("[WSChatStreamServer] No chat stream live, closing sockets")
+			s.closeAllSockets()
 		}
 		s.handleChatStreamMessages()
 		time.Sleep(50 * time.Millisecond)
@@ -83,13 +121,16 @@ func (s *WSChatStreamServer) handleChatStreamMessages() {
 		}
 		select {
 		case msg := <-chatStream.GetMessagesChan():
-			s.conn.WriteJSON(map[string]any{
+			data := map[string]any{
 				"type":         "msg",
 				"userName":     msg.Name,
 				"platform":     msg.Platform,
 				"timestamp":    msg.Timestamp,
 				"messageParts": msg.MessageParts,
-			})
+			}
+			for _, ws := range s.conns {
+				ws.WriteJSON(data)
+			}
 		default:
 			// Do nothing
 		}

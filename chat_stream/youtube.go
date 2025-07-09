@@ -43,7 +43,7 @@ func generateChatStream(channelID string, continuationToken string) (ChatStreamC
 				return
 			}
 			iterateAndStreamNewMessages(con)
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}()
 	return con, nil

@@ -53,7 +53,7 @@ body {
 .message-body-container {
     width: 100%;
     padding: 10px;
-    background-color: #A4A0CE;
+    background-color: rgba(164, 160, 206, 0.9);
     border-radius: 12px;
     color: white;
 }
