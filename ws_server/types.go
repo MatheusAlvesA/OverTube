@@ -167,6 +167,21 @@ func (s *WSChatStreamServer) handleChatStreamMessages() {
 	}
 }
 
+func (s *WSChatStreamServer) RemoveAllStreamsFromPlatform(platform chat_stream.PlatformType) {
+	newList := []chat_stream.ChatStreamCon{}
+	for _, stream := range s.srcStreams {
+		if stream.GetPlatform() != platform {
+			newList = append(newList, stream)
+		} else {
+			s.StatusEventChan <- ChannelConnectionStatusEvent{
+				Platform: platform,
+				Status:   ChannelConnectionStopped,
+			}
+		}
+	}
+	s.srcStreams = newList
+}
+
 func (s *WSChatStreamServer) AddStream(stream chat_stream.ChatStreamCon) {
 	s.srcStreams = append(s.srcStreams, stream)
 	s.StatusEventChan <- ChannelConnectionStatusEvent{

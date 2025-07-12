@@ -40,9 +40,15 @@ type UIEventSetYoutubeChannel struct {
 
 func (e UIEventSetYoutubeChannel) GetError() error { return nil }
 
+type UIEventRemoveYoutubeChannel struct{}
+
+func (e UIEventRemoveYoutubeChannel) GetError() error { return nil }
+
 type UIState struct {
-	YoutubeChannelURLEditor *widget.Editor
-	YouTubeChannelClickable *widget.Clickable
-	YoutubeChannelSet       string
-	YoutubeConnStatus       ws_server.ChannelConnectionStatus
+	YoutubeChannelURLEditor    *widget.Editor
+	YouTubeChannelClickable    *widget.Clickable
+	YoutubeChannelSet          string
+	YoutubeConnStatus          ws_server.ChannelConnectionStatus
+	YoutubeChannelWasConnected bool
+	UIClosed                   bool
 }

@@ -58,7 +58,7 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 			var err error = nil
 			chatStream, err = chat_stream.ConnectToYoutubeChat(v.Channel)
 			if err != nil {
-				log.Println("Failed to connect to YouTube chat: ", err)
+				log.Println("Failed to connect to YouTube chat:", v.Channel, err)
 				uiCommandsChan <- ui.ChannelConnectionStatusChange{
 					Platform: chat_stream.PlatformTypeYoutube,
 					Status:   ws_server.ChannelConnectionStopped,
@@ -66,6 +66,8 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 			} else {
 				wsServer.AddStream(chatStream)
 			}
+		case ui.UIEventRemoveYoutubeChannel:
+			wsServer.RemoveAllStreamsFromPlatform(chat_stream.PlatformTypeYoutube)
 		case ui.UIEventExit:
 			log.Println("User exited")
 		default:

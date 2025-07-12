@@ -6,6 +6,7 @@ import (
 	"log"
 	"overtube/chat_stream"
 	"overtube/ws_server"
+	"time"
 
 	"gioui.org/app"
 	"gioui.org/io/pointer"
@@ -45,10 +46,12 @@ func run(window *app.Window, uiEvents chan<- UIEvent, uiCommands <-chan UIComman
 	theme := material.NewTheme()
 	state := initialState()
 	go listenToCommands(window, state, uiCommands)
+	go retryEngine(state, uiEvents)
 	var ops op.Ops
 	for {
 		switch e := window.Event().(type) {
 		case app.DestroyEvent:
+			state.UIClosed = true
 			return e.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
@@ -82,13 +85,34 @@ func listenToCommands(w *app.Window, state *UIState, uiCommands <-chan UICommand
 	}
 }
 
+func retryEngine(state *UIState, uiEvents chan<- UIEvent) {
+	if state.UIClosed {
+		log.Println("UI closed, stopping retry engine")
+		return
+	}
+
+	if state.YoutubeChannelWasConnected &&
+		state.YoutubeChannelSet != "" &&
+		state.YoutubeConnStatus == ws_server.ChannelConnectionStopped {
+		log.Println("Retrying connection to YouTube channel:", state.YoutubeChannelSet)
+		uiEvents <- UIEventSetYoutubeChannel{
+			Channel: state.YoutubeChannelSet,
+		}
+	}
+	time.Sleep(time.Second * 2)
+	defer retryEngine(state, uiEvents)
+}
+
 func handleCommand(w *app.Window, state *UIState, cmd UICommand) {
 	switch t := cmd.(type) {
 	case ChannelConnectionStatusChange:
 		if t.Platform == chat_stream.PlatformTypeYoutube {
 			state.YoutubeConnStatus = t.Status
 			if t.Status == ws_server.ChannelConnectionStopped {
-				state.YoutubeChannelSet = ""
+				state.YoutubeConnStatus = ws_server.ChannelConnectionStopped
+			}
+			if t.Status == ws_server.ChannelConnectionRunning {
+				state.YoutubeChannelWasConnected = true
 			}
 			w.Invalidate()
 		}
@@ -103,7 +127,9 @@ func emitEvents(gtx layC, state *UIState, uiEvents chan<- UIEvent) {
 				Channel: state.YoutubeChannelURLEditor.Text(),
 			}
 		} else {
+			state.YoutubeChannelWasConnected = false
 			state.YoutubeChannelSet = ""
+			uiEvents <- UIEventRemoveYoutubeChannel{}
 		}
 	}
 	if state.YouTubeChannelClickable.Hovered() {

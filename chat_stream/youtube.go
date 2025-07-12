@@ -228,6 +228,9 @@ func getMessagePartFromChatItemEntry(messageEntry map[string]any) (ChatStreamMes
 }
 
 func getMessagesAPIResponse(continuationToken string) (map[string]any, error) {
+	client := http.Client{
+		Timeout: 10 * time.Second,
+	}
 	reqData := map[string]any{
 		"continuation": continuationToken,
 		"context": map[string]any{
@@ -243,7 +246,7 @@ func getMessagesAPIResponse(continuationToken string) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := http.Post(
+	resp, err := client.Post(
 		"https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?prettyPrint=false",
 		"application/json",
 		strings.NewReader(string(jsonBytes)),
