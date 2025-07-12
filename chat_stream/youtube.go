@@ -197,18 +197,38 @@ func getBadgesFromChatItem(item map[string]any) []ChatUserBadge {
 			"tooltip",
 		}, false)
 		if !ok {
-			continue // Skip if no name found
+			continue
 		}
-		// TODO
-		imgSrc := "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3"
 
 		badgeType, ok := GetDeepMapValue(badgeMap, []any{
 			"liveChatAuthorBadgeRenderer",
 			"icon",
 			"iconType",
-		}, false)
+		}, true)
 		if !ok {
-			badgeType = "default"
+			badgeType = "CUSTOM"
+		}
+
+		imgSrc := "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Icon-round-Question_mark.svg/240px-Icon-round-Question_mark.svg.png"
+		if badgeType == "VERIFIED" {
+			imgSrc = "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/3"
+		}
+		if badgeType == "MODERATOR" {
+			imgSrc = "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3"
+		}
+		if badgeType == "OWNER" {
+			imgSrc = "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3"
+		}
+
+		customUrl, ok := GetDeepMapValue(badgeMap, []any{
+			"liveChatAuthorBadgeRenderer",
+			"customThumbnail",
+			"thumbnails",
+			-1,
+			"url",
+		}, true)
+		if ok {
+			imgSrc = customUrl.(string)
 		}
 
 		chatBadges = append(chatBadges, ChatUserBadge{
@@ -375,33 +395,67 @@ func getContinuationFromAllChat(continuationToken string) (string, error) {
 }
 
 func getLiveStreamFromChannelId(channelID string) (string, error) {
-	resp, err := http.Get("https://www.youtube.com/@" + channelID)
+	resp, err := getYoutubeInitialData(channelID)
 	if err != nil {
 		return "", err
+	}
+
+	videoId, ok := GetDeepMapValue(resp, []any{
+		"contents",
+		"twoColumnBrowseResultsRenderer",
+		"tabs",
+		0,
+		"tabRenderer",
+		"content",
+		"sectionListRenderer",
+		"contents",
+		0,
+		"itemSectionRenderer",
+		"contents",
+		0,
+		"channelFeaturedContentRenderer",
+		"items",
+		0,
+		"videoRenderer",
+		"videoId",
+	}, false)
+	if !ok {
+		return "", &CustomError{message: "Live stream video ID not found in channel data"}
+	}
+
+	return "https://www.youtube.com/watch?v=" + videoId.(string), nil
+}
+
+func getYoutubeInitialData(channelID string) (map[string]any, error) {
+	resp, err := http.Get("https://www.youtube.com/@" + channelID)
+	if err != nil {
+		return nil, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", &CustomError{message: "Failed to fetch channel page, status code: " + strconv.Itoa(resp.StatusCode)}
+		return nil, &CustomError{message: "Failed to fetch channel page, status code: " + strconv.Itoa(resp.StatusCode)}
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	indexOffset := 71
-	index := strings.Index(string(body), "channelFeaturedContentRenderer\":{\"items\":[{\"videoRenderer\":{\"videoId\":\"")
-	if index < 0 {
-		index = strings.Index(string(body), "\"channelVideoPlayerRenderer\":{\"videoId\":\"")
-		indexOffset = 41
-		if index < 0 {
-			return "", &CustomError{message: "Live stream data not found in response"}
-		}
+	// Find the initial data script tag
+	startIndex := strings.Index(string(body), "ytInitialData = ")
+	if startIndex < 0 {
+		return nil, &CustomError{message: "Initial data not found in response"}
 	}
-	index += indexOffset // Length of the string before the JSON data
-	endIndex := strings.Index(string(body)[index:], "\"")
+	endIndex := strings.Index(string(body)[startIndex:], "};") + 1
 	if endIndex < 0 {
-		return "", &CustomError{message: "End of live stream code data not found"}
+		return nil, &CustomError{message: "End of initial data not found"}
+	}
+	rawJson := string(body)[startIndex+16 : startIndex+endIndex]
+
+	var data map[string]any
+	err = json.Unmarshal([]byte(rawJson), &data)
+	if err != nil {
+		return nil, err
 	}
 
-	return ("https://www.youtube.com/watch?v=" + string(body)[index:index+endIndex]), nil
+	return data, nil
 }
