@@ -50,6 +50,7 @@ type ChatStreamCon interface {
 	IsConnected() bool
 	GetMessagesChan() <-chan ChatStreamMessage
 	Close()
+	GetPlatform() PlatformType
 }
 
 type YTChatStreamCon struct {
@@ -71,4 +72,8 @@ func (c *YTChatStreamCon) Close() {
 		close(c.stream)
 		c.stream = nil // Clear the stream to prevent further messages
 	}
+}
+func (c *YTChatStreamCon) GetPlatform() PlatformType {
+	// Placeholder for actual connection check logic
+	return PlatformTypeYoutube
 }

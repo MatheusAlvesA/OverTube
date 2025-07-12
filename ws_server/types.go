@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"overtube/chat_stream"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -22,11 +23,36 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+type ChannelConnectionStatus uint
+
+const (
+	ChannelConnectionStopped ChannelConnectionStatus = iota
+	ChannelConnectionStarting
+	ChannelConnectionRunning
+)
+
+type ChannelConnectionStatusEvent struct {
+	Platform chat_stream.PlatformType
+	Status   ChannelConnectionStatus
+}
+
+type WSConnection struct {
+	Conn *websocket.Conn
+	mu   sync.Mutex
+}
+
+func (c *WSConnection) Send(data any) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.Conn.WriteJSON(data)
+}
+
 type WSChatStreamServer struct {
-	Port       uint
-	srcStreams []chat_stream.ChatStreamCon
-	conns      []*websocket.Conn
-	srv        *http.Server
+	Port            uint
+	srcStreams      []chat_stream.ChatStreamCon
+	conns           []*WSConnection
+	srv             *http.Server
+	StatusEventChan chan ChannelConnectionStatusEvent
 }
 
 func (s *WSChatStreamServer) Start() bool {
@@ -45,8 +71,10 @@ func (s *WSChatStreamServer) Start() bool {
 			log.Println("[WSChatStreamServer] Fail to upgrade to WS", err)
 			return
 		}
-		s.conns = append(s.conns, conn)
+		s.conns = append(s.conns, &WSConnection{Conn: conn})
 	})
+
+	s.StatusEventChan = make(chan ChannelConnectionStatusEvent)
 
 	go s.srv.ListenAndServe()
 	go s.loopChatStreamMessages()
@@ -63,13 +91,15 @@ func (s *WSChatStreamServer) Stop() {
 		s.srv.Shutdown(ctx)
 	}
 	s.srv = nil
+	close(s.StatusEventChan)
+	s.StatusEventChan = nil
 }
 
 func (s *WSChatStreamServer) closeAllSockets() {
 	for _, conn := range s.conns {
-		conn.Close()
+		conn.Conn.Close()
 	}
-	s.conns = []*websocket.Conn{}
+	s.conns = []*WSConnection{}
 }
 
 func (s *WSChatStreamServer) clearOldConnections() {
@@ -77,19 +107,19 @@ func (s *WSChatStreamServer) clearOldConnections() {
 		if s.srv == nil {
 			return
 		}
-		newList := []*websocket.Conn{}
+		newList := []*WSConnection{}
 		for _, conn := range s.conns {
-			conn.WriteJSON(map[string]any{
+			conn.Send(map[string]any{
 				"type":    "cmd",
 				"command": "ping",
 			})
 			var v map[string]any = nil
-			err := conn.ReadJSON(&v)
+			err := conn.Conn.ReadJSON(&v)
 			if err == nil && v != nil && v["command"] == "pong" {
 				newList = append(newList, conn)
 			} else {
 				log.Println("[WSChatStreamServer] No response from client, disconnected")
-				conn.Close()
+				conn.Conn.Close()
 			}
 		}
 		s.conns = newList
@@ -129,7 +159,7 @@ func (s *WSChatStreamServer) handleChatStreamMessages() {
 				"messageParts": msg.MessageParts,
 			}
 			for _, ws := range s.conns {
-				ws.WriteJSON(data)
+				ws.Send(data)
 			}
 		default:
 			// Do nothing
@@ -139,8 +169,16 @@ func (s *WSChatStreamServer) handleChatStreamMessages() {
 
 func (s *WSChatStreamServer) AddStream(stream chat_stream.ChatStreamCon) {
 	s.srcStreams = append(s.srcStreams, stream)
+	s.StatusEventChan <- ChannelConnectionStatusEvent{
+		Platform: stream.GetPlatform(),
+		Status:   ChannelConnectionRunning,
+	}
 }
 
 func (s *WSChatStreamServer) RemoveStream(i int) {
+	s.StatusEventChan <- ChannelConnectionStatusEvent{
+		Platform: s.srcStreams[i].GetPlatform(),
+		Status:   ChannelConnectionStopped,
+	}
 	s.srcStreams = append(s.srcStreams[:i], s.srcStreams[i+1:]...)
 }

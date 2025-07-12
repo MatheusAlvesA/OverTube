@@ -30,6 +30,7 @@ body {
 .message-emote-img {
     width: 20px;
     vertical-align: middle;
+    margin-left: 5px;
 }
 
 .message-container {
@@ -56,4 +57,5 @@ body {
     background-color: rgba(164, 160, 206, 0.9);
     border-radius: 12px;
     color: white;
+    word-wrap: break-word;
 }

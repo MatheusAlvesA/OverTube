@@ -1,24 +1,30 @@
 package ui
 
 import (
+	"image"
 	"image/color"
+	"log"
+	"overtube/chat_stream"
+	"overtube/ws_server"
 
 	"gioui.org/app"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/op/clip"
+	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 )
 
-func CreateHomeWindow(uiEvents chan<- UIEvent) {
+func CreateHomeWindow(uiEvents chan<- UIEvent, uiCommands <-chan UICommand) {
 	go func() {
 		window := &app.Window{}
 		window.Option(app.Title("OverTube"))
 		window.Option(app.MinSize(400, 300))
-		err := run(window, uiEvents)
+		err := run(window, uiEvents, uiCommands)
 		uiEvents <- UIEventExit{err: err}
 		close(uiEvents)
 	}()
@@ -35,9 +41,10 @@ func initialState() *UIState {
 	return state
 }
 
-func run(window *app.Window, uiEvents chan<- UIEvent) error {
+func run(window *app.Window, uiEvents chan<- UIEvent, uiCommands <-chan UICommand) error {
 	theme := material.NewTheme()
 	state := initialState()
+	go listenToCommands(window, state, uiCommands)
 	var ops op.Ops
 	for {
 		switch e := window.Event().(type) {
@@ -64,10 +71,39 @@ func run(window *app.Window, uiEvents chan<- UIEvent) error {
 	}
 }
 
+func listenToCommands(w *app.Window, state *UIState, uiCommands <-chan UICommand) {
+	for {
+		cmd, more := <-uiCommands
+		if !more {
+			log.Println("uiCommands event channel closed")
+			break
+		}
+		handleCommand(w, state, cmd)
+	}
+}
+
+func handleCommand(w *app.Window, state *UIState, cmd UICommand) {
+	switch t := cmd.(type) {
+	case ChannelConnectionStatusChange:
+		if t.Platform == chat_stream.PlatformTypeYoutube {
+			state.YoutubeConnStatus = t.Status
+			if t.Status == ws_server.ChannelConnectionStopped {
+				state.YoutubeChannelSet = ""
+			}
+			w.Invalidate()
+		}
+	}
+}
+
 func emitEvents(gtx layC, state *UIState, uiEvents chan<- UIEvent) {
 	if state.YouTubeChannelClickable.Clicked(gtx) {
-		uiEvents <- UIEventSetYoutubeChannel{
-			Channel: state.YoutubeChannelURLEditor.Text(),
+		if state.YoutubeChannelSet == "" {
+			state.YoutubeChannelSet = state.YoutubeChannelURLEditor.Text()
+			uiEvents <- UIEventSetYoutubeChannel{
+				Channel: state.YoutubeChannelURLEditor.Text(),
+			}
+		} else {
+			state.YoutubeChannelSet = ""
 		}
 	}
 	if state.YouTubeChannelClickable.Hovered() {
@@ -93,11 +129,15 @@ func renderYoutubeChannelInput(
 	state *UIState,
 ) layout.FlexChild {
 	editor := state.YoutubeChannelURLEditor
-	editorUI := material.Editor(theme, editor, "YouTube Channel URL")
+	editorUI := material.Editor(theme, editor, "YouTube @Channel")
 	editorUI.LineHeight = 1.5
 
 	submit := state.YouTubeChannelClickable
 	submitUI := material.Button(theme, submit, "Set Channel")
+
+	if state.YoutubeChannelSet != "" {
+		submitUI.Text = "Remove"
+	}
 
 	if state.YoutubeChannelURLEditor.Text() == "" {
 		submitUI.Background = color.NRGBA{R: 200, G: 200, B: 200, A: 255}
@@ -131,10 +171,42 @@ func renderYoutubeChannelInput(
 								return layout.UniformInset(6).Layout(
 									gtx,
 									func(gtx layC) layD {
+										if state.YoutubeChannelSet != "" {
+											paint.FillShape(gtx.Ops,
+												color.NRGBA{R: 220, G: 220, B: 220, A: 255},
+												clip.Rect{
+													Max: image.Point{
+														X: gtx.Constraints.Max.X,
+														Y: 30,
+													},
+												}.Op(),
+											)
+											return material.Body1(theme, state.YoutubeChannelSet).Layout(gtx)
+										}
 										return editorUI.Layout(gtx)
 									},
 								)
 							})
+						},
+					),
+					layout.Rigid(
+						func(gtx layC) layD {
+							circle := clip.Ellipse{
+								Min: image.Pt(10, 10),
+								Max: image.Pt(30, 30),
+							}.Op(gtx.Ops)
+
+							c := color.NRGBA{R: 92, G: 184, B: 92, A: 255}
+							if state.YoutubeConnStatus == ws_server.ChannelConnectionStarting {
+								c = color.NRGBA{R: 255, G: 204, B: 0, A: 255}
+							}
+							if state.YoutubeConnStatus == ws_server.ChannelConnectionStopped {
+								c = color.NRGBA{R: 204, G: 51, B: 0, A: 255}
+							}
+
+							paint.FillShape(gtx.Ops, c, circle)
+
+							return layout.Dimensions{Size: image.Pt(40, 40)}
 						},
 					),
 					layout.Rigid(

@@ -11,13 +11,29 @@ import (
 
 var wsServer = ws_server.CreateServer()
 var webServer = web_server.CreateServer()
+var uiCommandsChan = make(chan ui.UICommand)
 
 func main() {
 	uiEventChan := make(chan ui.UIEvent)
-	go ui.CreateHomeWindow(uiEventChan)
+	go ui.CreateHomeWindow(uiEventChan, uiCommandsChan)
+	go handleUICommands()
 	orchestrateEvents(uiEventChan)
 	wsServer.Stop()
 	webServer.Stop()
+}
+
+func handleUICommands() {
+	for {
+		statusEvent, more := <-wsServer.StatusEventChan
+		if !more {
+			log.Println("StatusEventChan event channel closed")
+			break
+		}
+		uiCommandsChan <- ui.ChannelConnectionStatusChange{
+			Platform: statusEvent.Platform,
+			Status:   statusEvent.Status,
+		}
+	}
 }
 
 func orchestrateEvents(uiEventChan chan ui.UIEvent) {
@@ -35,10 +51,18 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 		switch v := event.(type) {
 		case ui.UIEventSetYoutubeChannel:
 			closeChatStream(chatStream)
+			uiCommandsChan <- ui.ChannelConnectionStatusChange{
+				Platform: chat_stream.PlatformTypeYoutube,
+				Status:   ws_server.ChannelConnectionStarting,
+			}
 			var err error = nil
 			chatStream, err = chat_stream.ConnectToYoutubeChat(v.Channel)
 			if err != nil {
 				log.Println("Failed to connect to YouTube chat: ", err)
+				uiCommandsChan <- ui.ChannelConnectionStatusChange{
+					Platform: chat_stream.PlatformTypeYoutube,
+					Status:   ws_server.ChannelConnectionStopped,
+				}
 			} else {
 				wsServer.AddStream(chatStream)
 			}
