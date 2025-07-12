@@ -52,6 +52,10 @@ body {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+
+    display: flex;
+    justify-content: start;
+    align-items: center;
 }
 
 .message-body-container {
@@ -61,4 +65,21 @@ body {
     border-radius: 12px;
     color: white;
     word-wrap: break-word;
+}
+
+.message-head-badges-container {
+    display: inline-flex;
+    align-items: start;
+    gap: 5px;
+    margin-right: 5px;
+}
+
+.message-badge-img {
+    height: 20px;
+}
+
+.message-head-name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }

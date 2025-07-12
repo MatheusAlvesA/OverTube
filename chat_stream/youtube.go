@@ -172,7 +172,53 @@ func getMessageFromChatItem(item map[string]any, lastTimeUpdate int64) (*ChatStr
 		Name:         name.(string),
 		MessageParts: messageParts,
 		Timestamp:    timestampInt,
+		Badges:       getBadgesFromChatItem(item),
 	}, nil
+}
+
+func getBadgesFromChatItem(item map[string]any) []ChatUserBadge {
+	badgesData, ok := GetDeepMapValue(item, []any{
+		"authorBadges",
+	}, true)
+	if !ok {
+		return []ChatUserBadge{}
+	}
+	badges, ok := badgesData.([]any)
+	if !ok {
+		log.Println("Badges data is not in expected format, returning empty badges")
+		return []ChatUserBadge{}
+	}
+
+	var chatBadges []ChatUserBadge
+	for _, badge := range badges {
+		badgeMap := badge.(map[string]any)
+		name, ok := GetDeepMapValue(badgeMap, []any{
+			"liveChatAuthorBadgeRenderer",
+			"tooltip",
+		}, false)
+		if !ok {
+			continue // Skip if no name found
+		}
+		// TODO
+		imgSrc := "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3"
+
+		badgeType, ok := GetDeepMapValue(badgeMap, []any{
+			"liveChatAuthorBadgeRenderer",
+			"icon",
+			"iconType",
+		}, false)
+		if !ok {
+			badgeType = "default"
+		}
+
+		chatBadges = append(chatBadges, ChatUserBadge{
+			Name:   name.(string),
+			ImgSrc: imgSrc,
+			Type:   badgeType.(string),
+		})
+	}
+
+	return chatBadges
 }
 
 func getMessagePartFromChatItemEntry(messageEntry map[string]any) (ChatStreamMessagePart, error) {

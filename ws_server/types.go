@@ -157,6 +157,7 @@ func (s *WSChatStreamServer) handleChatStreamMessages() {
 				"platform":     msg.Platform,
 				"timestamp":    msg.Timestamp,
 				"messageParts": msg.MessageParts,
+				"badges":       msg.Badges,
 			}
 			for _, ws := range s.conns {
 				ws.Send(data)

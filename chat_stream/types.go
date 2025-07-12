@@ -36,6 +36,7 @@ type ChatStreamMessage struct {
 	Name         string
 	MessageParts []ChatStreamMessagePart
 	Timestamp    int64
+	Badges       []ChatUserBadge
 }
 
 func (m *ChatStreamMessage) GetMessagePlainText() string {
@@ -44,6 +45,12 @@ func (m *ChatStreamMessage) GetMessagePlainText() string {
 		messageText += part.Text
 	}
 	return messageText
+}
+
+type ChatUserBadge struct {
+	Name   string
+	ImgSrc string
+	Type   string
 }
 
 type ChatStreamCon interface {

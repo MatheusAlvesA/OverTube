@@ -66,7 +66,29 @@ function createMessageNode(message) {
 function createHeaderMessageNode(message) {
     const container = document.createElement('div');
     container.classList.add('message-head-container');
-    container.innerText = message.userName;
+
+    container.appendChild(createHeadeBadgesrMessageNode(message));
+
+    const name = document.createElement('div');
+    name.classList.add('message-head-name');
+    name.innerText = message.userName;
+    container.appendChild(name);
+
+    return container
+}
+
+function createHeadeBadgesrMessageNode(message) {
+    const container = document.createElement('div');
+    container.classList.add('message-head-badges-container');
+
+    message.badges.forEach(badge => {
+        const img = document.createElement('img');
+        img.src = badge.ImgSrc;
+        img.classList.add('message-badge-img');
+        img.setAttribute('data-tooltip', badge.Name);
+        container.appendChild(img);
+    });
+
     return container
 }
 
