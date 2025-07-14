@@ -287,7 +287,7 @@ func getMessagePartFromChatItemEntry(messageEntry map[string]any) (ChatStreamMes
 	message.EmoteName = emojiName.(string)
 
 	if message.Text == "" {
-		message.Text = message.EmoteName // Fallback to emote name if no text is
+		message.Text = message.EmoteName
 	}
 
 	return message, nil

@@ -16,7 +16,7 @@ const MAX_WS_CONNS = 5
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+	WriteBufferSize: 2048,
 	CheckOrigin: func(r *http.Request) bool {
 		origin, ok := r.Header["Origin"]
 		return ok && len(origin) == 1 && origin[0] == "http://localhost:1337"

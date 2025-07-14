@@ -68,6 +68,7 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 			}
 		case ui.UIEventRemoveYoutubeChannel:
 			wsServer.RemoveAllStreamsFromPlatform(chat_stream.PlatformTypeYoutube)
+			closeChatStream(chatStream)
 		case ui.UIEventExit:
 			log.Println("User exited")
 		default:

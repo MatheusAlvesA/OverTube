@@ -68,7 +68,6 @@ type YTChatStreamCon struct {
 }
 
 func (c *YTChatStreamCon) IsConnected() bool {
-	// Placeholder for actual connection check logic
 	return c.stream != nil
 }
 func (c *YTChatStreamCon) GetMessagesChan() <-chan ChatStreamMessage {
@@ -81,6 +80,5 @@ func (c *YTChatStreamCon) Close() {
 	}
 }
 func (c *YTChatStreamCon) GetPlatform() PlatformType {
-	// Placeholder for actual connection check logic
 	return PlatformTypeYoutube
 }
