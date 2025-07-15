@@ -1,5 +1,7 @@
 package chat_stream
 
+import "github.com/gorilla/websocket"
+
 type PlatformType string
 
 const (
@@ -81,4 +83,30 @@ func (c *YTChatStreamCon) Close() {
 }
 func (c *YTChatStreamCon) GetPlatform() PlatformType {
 	return PlatformTypeYoutube
+}
+
+type TWChatStreamCon struct {
+	ChannelID string
+	ws        *websocket.Conn
+	stream    chan ChatStreamMessage
+}
+
+func (c *TWChatStreamCon) IsConnected() bool {
+	return c.stream != nil && c.ws != nil
+}
+func (c *TWChatStreamCon) GetMessagesChan() <-chan ChatStreamMessage {
+	return c.stream
+}
+func (c *TWChatStreamCon) Close() {
+	if c.stream != nil {
+		close(c.stream)
+		c.stream = nil
+	}
+	if c.ws != nil {
+		c.ws.Close()
+		c.ws = nil
+	}
+}
+func (c *TWChatStreamCon) GetPlatform() PlatformType {
+	return PlatformTypeTwitch
 }
