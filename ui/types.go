@@ -38,11 +38,19 @@ type UIEventSetYoutubeChannel struct {
 	Channel string
 }
 
+type UIEventSetTwitchChannel struct {
+	Channel string
+}
+
 func (e UIEventSetYoutubeChannel) GetError() error { return nil }
 
+func (e UIEventSetTwitchChannel) GetError() error { return nil }
+
 type UIEventRemoveYoutubeChannel struct{}
+type UIEventRemoveTwitchChannel struct{}
 
 func (e UIEventRemoveYoutubeChannel) GetError() error { return nil }
+func (e UIEventRemoveTwitchChannel) GetError() error  { return nil }
 
 type UIState struct {
 	YoutubeChannelURLEditor    *widget.Editor
@@ -50,5 +58,12 @@ type UIState struct {
 	YoutubeChannelSet          string
 	YoutubeConnStatus          ws_server.ChannelConnectionStatus
 	YoutubeChannelWasConnected bool
-	UIClosed                   bool
+
+	TwitchChannelURLEditor    *widget.Editor
+	TwitchChannelClickable    *widget.Clickable
+	TwitchChannelSet          string
+	TwitchConnStatus          ws_server.ChannelConnectionStatus
+	TwitchChannelWasConnected bool
+
+	UIClosed bool
 }

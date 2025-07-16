@@ -89,6 +89,7 @@ type TWChatStreamCon struct {
 	ChannelID string
 	ws        *websocket.Conn
 	stream    chan ChatStreamMessage
+	badgesDB  map[string]ChatUserBadge
 }
 
 func (c *TWChatStreamCon) IsConnected() bool {

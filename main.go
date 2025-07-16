@@ -37,7 +37,8 @@ func handleUICommands() {
 }
 
 func orchestrateEvents(uiEventChan chan ui.UIEvent) {
-	var chatStream chat_stream.ChatStreamCon = nil
+	var ytChatStream chat_stream.ChatStreamCon = nil
+	var twChatStream chat_stream.ChatStreamCon = nil
 	for {
 		event, more := <-uiEventChan
 		if !more {
@@ -50,13 +51,13 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 
 		switch v := event.(type) {
 		case ui.UIEventSetYoutubeChannel:
-			closeChatStream(chatStream)
+			closeChatStream(ytChatStream)
 			uiCommandsChan <- ui.ChannelConnectionStatusChange{
 				Platform: chat_stream.PlatformTypeYoutube,
 				Status:   ws_server.ChannelConnectionStarting,
 			}
 			var err error = nil
-			chatStream, err = chat_stream.ConnectToYoutubeChat(v.Channel)
+			ytChatStream, err = chat_stream.ConnectToYoutubeChat(v.Channel)
 			if err != nil {
 				log.Println("Failed to connect to YouTube chat:", v.Channel, err)
 				uiCommandsChan <- ui.ChannelConnectionStatusChange{
@@ -64,11 +65,31 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 					Status:   ws_server.ChannelConnectionStopped,
 				}
 			} else {
-				wsServer.AddStream(chatStream)
+				wsServer.AddStream(ytChatStream)
+			}
+		case ui.UIEventSetTwitchChannel:
+			closeChatStream(twChatStream)
+			uiCommandsChan <- ui.ChannelConnectionStatusChange{
+				Platform: chat_stream.PlatformTypeTwitch,
+				Status:   ws_server.ChannelConnectionStarting,
+			}
+			var err error = nil
+			twChatStream, err = chat_stream.ConnectToTwitchChat(v.Channel)
+			if err != nil {
+				log.Println("Failed to connect to Twitch chat:", v.Channel, err)
+				uiCommandsChan <- ui.ChannelConnectionStatusChange{
+					Platform: chat_stream.PlatformTypeTwitch,
+					Status:   ws_server.ChannelConnectionStopped,
+				}
+			} else {
+				wsServer.AddStream(twChatStream)
 			}
 		case ui.UIEventRemoveYoutubeChannel:
 			wsServer.RemoveAllStreamsFromPlatform(chat_stream.PlatformTypeYoutube)
-			closeChatStream(chatStream)
+			closeChatStream(ytChatStream)
+		case ui.UIEventRemoveTwitchChannel:
+			wsServer.RemoveAllStreamsFromPlatform(chat_stream.PlatformTypeTwitch)
+			closeChatStream(twChatStream)
 		case ui.UIEventExit:
 			log.Println("User exited")
 		default:
@@ -76,7 +97,8 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 		}
 	}
 
-	closeChatStream(chatStream)
+	closeChatStream(ytChatStream)
+	closeChatStream(twChatStream)
 }
 
 func closeChatStream(chatStream chat_stream.ChatStreamCon) {
