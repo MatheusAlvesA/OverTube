@@ -1,8 +1,13 @@
 package chat_stream
 
 import (
+	"encoding/json"
+	"io"
 	"log"
+	"math"
+	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -113,14 +118,96 @@ func fillBadgesDatabase(con *TWChatStreamCon) {
 	}
 
 	con.badgesDB = badges
+
+	// Fill custom badges from Twitch API in a separate goroutine for optimal performance
+	go fillCustomBadgesDatabase(con)
+}
+
+func fillCustomBadgesDatabase(con *TWChatStreamCon) {
+	reqData := map[string]any{
+		"operationName": "ChatList_Badges",
+		"variables": map[string]any{
+			"channelLogin": con.ChannelID,
+		},
+		"extensions": map[string]any{
+			"persistedQuery": map[string]any{
+				"version":    1,
+				"sha256Hash": "838a7e0b47c09cac05f93ff081a9ff4f876b68f7624f0fc465fe30031e372fc2",
+			},
+		},
+	}
+	jsonBytes, err := json.Marshal([]map[string]any{reqData})
+	if err != nil {
+		log.Println("Error marshaling JSON for Twitch badges:", err)
+		return
+	}
+
+	req, _ := http.NewRequest(http.MethodPost, "https://gql.twitch.tv/gql", nil)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("client-id", "kimne78kx3ncx6brgo4mv6wki5h1ko")
+	req.Body = io.NopCloser(strings.NewReader(string(jsonBytes)))
+
+	client := http.Client{
+		Timeout: 10 * time.Second,
+	}
+	resp, err := client.Do(req)
+
+	if err != nil {
+		log.Println("Fail to get custom badges from channel", err)
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		log.Println("Fail to get custom badges from channel, status: ", resp.StatusCode)
+		return
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Error parsing JSON from Twitch badges:", err)
+		return
+	}
+
+	var data []map[string]any
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		log.Println("Error unmarshaling JSON from Twitch badges:", err)
+		return
+	}
+	badgesMap, ok := GetDeepMapValue(data[0], []any{"data", "user", "broadcastBadges"}, false)
+	if !ok {
+		log.Println("Error getting custom badges from Twitch response")
+		return
+	}
+
+	for _, badge := range badgesMap.([]any) {
+		badgeData, ok := badge.(map[string]any)
+		if !ok {
+			log.Println("Error parsing badge data from Twitch response", badge)
+			continue
+		}
+		con.badgesDB[badgeData["setID"].(string)+"/"+badgeData["version"].(string)] = ChatUserBadge{
+			Name:   badgeData["title"].(string),
+			ImgSrc: badgeData["image4x"].(string),
+			Type:   "custom",
+		}
+	}
 }
 
 func iterateOnTwMessages(con *TWChatStreamCon) {
+	pingTimerval := time.NewTicker(30 * time.Second)
+	defer pingTimerval.Stop()
 	for {
 		if !con.IsConnected() {
 			con.Close()
 			return
 		}
+		select {
+		case <-pingTimerval.C:
+			con.ws.WriteMessage(websocket.TextMessage, []byte("PING"))
+		default:
+			// Continue to read messages
+		}
+
 		_, message, err := con.ws.ReadMessage()
 		if err != nil {
 			log.Println(err)
@@ -128,7 +215,7 @@ func iterateOnTwMessages(con *TWChatStreamCon) {
 			return
 		}
 		parsed, err := parseTwMessage(con, string(message))
-		if err != nil {
+		if err != nil || parsed == nil {
 			continue
 		}
 		con.stream <- *parsed
@@ -145,21 +232,106 @@ func parseTwMessage(con *TWChatStreamCon, message string) (*ChatStreamMessage, e
 		timestamp = int(time.Now().Unix())
 	}
 
-	messageParts := []ChatStreamMessagePart{}
-	messageParts = append(messageParts, ChatStreamMessagePart{
-		PartType: ChatStreamMessagePartTypeText,
-		Text:     data["message"],
-	})
-
 	res := &ChatStreamMessage{
 		Platform:     PlatformTypeTwitch,
 		Name:         data["display-name"],
-		MessageParts: messageParts,
+		MessageParts: partMessageParts(data["message"], data["emotes"]),
 		Timestamp:    int64(timestamp / 1000),
 		Badges:       parseBadges(con, data),
 	}
 
 	return res, nil
+}
+
+func partMessageParts(message string, emotes string) []ChatStreamMessagePart {
+	parts := []ChatStreamMessagePart{}
+	if message == "" {
+		return parts
+	}
+
+	if emotes == "" {
+		parts = append(parts, ChatStreamMessagePart{
+			PartType: ChatStreamMessagePartTypeText,
+			Text:     message,
+		})
+		return parts
+	}
+
+	emoteRawList := strings.Split(emotes, "/")
+	emoteParsedList := []map[string]any{}
+	for _, emoteRaw := range emoteRawList {
+		if emoteRaw == "" {
+			log.Println("Empty emote found in Twitch message, skipping")
+			continue
+		}
+		emoteParts := strings.Split(emoteRaw, ":")
+		if len(emoteParts) != 2 {
+			log.Println("Invalid emote format in Twitch message, expected 'id:start-end', got:", emotes)
+			continue
+		}
+		emoteUrl := "https://static-cdn.jtvnw.net/emoticons/v2/" + emoteParts[0] + "/default/dark/2.0"
+
+		emoteRanges := strings.SplitSeq(emoteParts[1], ",")
+		for emoteRange := range emoteRanges {
+			emotePositions := strings.Split(emoteRange, "-")
+			if len(emotePositions) != 2 {
+				log.Println("Invalid emote positions in Twitch message, expected 'start-end', got:", emoteRaw)
+				continue
+			}
+			start, err := strconv.Atoi(emotePositions[0])
+			if err != nil {
+				log.Println("Invalid start position in Twitch emote, skipping:", emoteRaw, err)
+				continue
+			}
+			end, err := strconv.Atoi(emotePositions[1])
+			if err != nil {
+				log.Println("Invalid end position in Twitch emote, skipping:", emoteRaw, err)
+				continue
+			}
+
+			emoteParsedList = append(emoteParsedList, map[string]any{
+				"start": start,
+				"end":   end,
+				"emote": ChatStreamMessagePart{
+					PartType:    ChatStreamMessagePartTypeEmote,
+					EmoteImgUrl: emoteUrl,
+					EmoteName:   message[start:int(math.Min(float64(end+1), float64(len(message))))],
+				},
+			})
+		}
+	}
+
+	sort.Slice(emoteParsedList, func(i, j int) bool {
+		return emoteParsedList[i]["start"].(int) < emoteParsedList[j]["start"].(int)
+	})
+
+	cursor := 0
+	for _, emoteData := range emoteParsedList {
+		start := emoteData["start"].(int)
+		end := emoteData["end"].(int)
+
+		if start < cursor {
+			log.Println("Emote start position is less than cursor, skipping:", start, cursor)
+			continue
+		}
+		if start > cursor {
+			parts = append(parts, ChatStreamMessagePart{
+				PartType: ChatStreamMessagePartTypeText,
+				Text:     message[cursor:start],
+			})
+		}
+		parts = append(parts, emoteData["emote"].(ChatStreamMessagePart))
+		cursor = end + 1
+	}
+
+	if cursor < len(message) {
+		parts = append(parts, ChatStreamMessagePart{
+			PartType: ChatStreamMessagePartTypeText,
+			Text:     message[cursor:],
+		})
+	}
+
+	return parts
 }
 
 func parseBadges(con *TWChatStreamCon, metaData map[string]string) []ChatUserBadge {
