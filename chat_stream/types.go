@@ -60,6 +60,7 @@ type ChatStreamCon interface {
 	GetMessagesChan() <-chan ChatStreamMessage
 	Close()
 	GetPlatform() PlatformType
+	GetUserId() string
 }
 
 type YTChatStreamCon struct {
@@ -84,9 +85,13 @@ func (c *YTChatStreamCon) Close() {
 func (c *YTChatStreamCon) GetPlatform() PlatformType {
 	return PlatformTypeYoutube
 }
+func (c *YTChatStreamCon) GetUserId() string {
+	return c.ChannelID
+}
 
 type TWChatStreamCon struct {
 	ChannelID string
+	UserID    string
 	ws        *websocket.Conn
 	stream    chan ChatStreamMessage
 	badgesDB  map[string]ChatUserBadge
@@ -110,4 +115,7 @@ func (c *TWChatStreamCon) Close() {
 }
 func (c *TWChatStreamCon) GetPlatform() PlatformType {
 	return PlatformTypeTwitch
+}
+func (c *TWChatStreamCon) GetUserId() string {
+	return c.UserID
 }

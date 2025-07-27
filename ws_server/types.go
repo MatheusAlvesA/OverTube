@@ -71,7 +71,9 @@ func (s *WSChatStreamServer) Start() bool {
 			log.Println("[WSChatStreamServer] Fail to upgrade to WS", err)
 			return
 		}
-		s.conns = append(s.conns, &WSConnection{Conn: conn})
+		newClient := &WSConnection{Conn: conn}
+		s.conns = append(s.conns, newClient)
+		go s.sendAllUserIdForClient(newClient)
 	})
 
 	s.StatusEventChan = make(chan ChannelConnectionStatusEvent)
@@ -125,6 +127,34 @@ func (s *WSChatStreamServer) clearOldConnections() {
 		s.conns = newList
 		time.Sleep(3 * time.Second)
 	}
+}
+
+func (s *WSChatStreamServer) sendNewUserIdForAllClents(stream chat_stream.ChatStreamCon) {
+	if s.srv == nil {
+		return
+	}
+	for _, conn := range s.conns {
+		s.sendNewUserId(conn, stream)
+	}
+}
+
+func (s *WSChatStreamServer) sendAllUserIdForClient(conn *WSConnection) {
+	time.Sleep(1 * time.Second) // Wait to guarantee client is connected
+	if s.srv == nil {
+		return
+	}
+	for _, client := range s.srcStreams {
+		s.sendNewUserId(conn, client)
+	}
+}
+
+func (s *WSChatStreamServer) sendNewUserId(conn *WSConnection, stream chat_stream.ChatStreamCon) {
+	conn.Send(map[string]any{
+		"type":     "cmd",
+		"command":  "setNewUserId",
+		"platform": stream.GetPlatform(),
+		"id":       stream.GetUserId(),
+	})
 }
 
 func (s *WSChatStreamServer) loopChatStreamMessages() {
@@ -189,6 +219,7 @@ func (s *WSChatStreamServer) AddStream(stream chat_stream.ChatStreamCon) {
 		Platform: stream.GetPlatform(),
 		Status:   ChannelConnectionRunning,
 	}
+	s.sendNewUserIdForAllClents(stream)
 }
 
 func (s *WSChatStreamServer) RemoveStream(i int) {

@@ -1,4 +1,6 @@
 var socket = null;
+var emoteMap = new Map();
+
 function openWebSocket() {
     if(socket != null) return;
 
@@ -36,6 +38,10 @@ function handleNewPayload(payload) {
 function handleNewCommand(command) {
     if(command.command === 'ping') {
         socket.send(JSON.stringify({'command': 'pong'}));
+    }
+    if(command.command === 'setNewUserId' && command.platform == 'twitch') {
+        emoteMap = new Map();
+        fillEmoteMap(emoteMap, command.id);
     }
 }
 

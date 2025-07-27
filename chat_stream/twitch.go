@@ -120,7 +120,7 @@ func fillBadgesDatabase(con *TWChatStreamCon) {
 	con.badgesDB = badges
 
 	// Fill custom badges from Twitch API in a separate goroutine for optimal performance
-	go fillCustomBadgesDatabase(con)
+	fillCustomBadgesDatabase(con)
 }
 
 func fillCustomBadgesDatabase(con *TWChatStreamCon) {
@@ -173,6 +173,14 @@ func fillCustomBadgesDatabase(con *TWChatStreamCon) {
 		log.Println("Error unmarshaling JSON from Twitch badges:", err)
 		return
 	}
+
+	userIdStr, ok := GetDeepMapValue(data[0], []any{"data", "user", "id"}, false)
+	if !ok {
+		log.Println("Error getting userId from Twitch response")
+	} else {
+		con.UserID = userIdStr.(string)
+	}
+
 	badgesMap, ok := GetDeepMapValue(data[0], []any{"data", "user", "broadcastBadges"}, false)
 	if !ok {
 		log.Println("Error getting custom badges from Twitch response")
