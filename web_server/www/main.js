@@ -47,6 +47,7 @@ function handleNewCommand(command) {
 
 
 function handleNewMessage(message) {
+    breakMessage(message, emoteMap);
     const node = createMessageNode(message);
     document.getElementById('messagesContainer').appendChild(node);
     deleteOldMessages();

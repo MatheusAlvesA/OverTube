@@ -237,7 +237,7 @@ func renderYoutubeChannelInput(
 												clip.Rect{
 													Max: image.Point{
 														X: gtx.Constraints.Max.X,
-														Y: 30,
+														Y: 20,
 													},
 												}.Op(),
 											)
@@ -253,7 +253,7 @@ func renderYoutubeChannelInput(
 						func(gtx layC) layD {
 							circle := clip.Ellipse{
 								Min: image.Pt(10, 10),
-								Max: image.Pt(30, 30),
+								Max: image.Pt(20, 20),
 							}.Op(gtx.Ops)
 
 							c := color.NRGBA{R: 92, G: 184, B: 92, A: 255}
@@ -266,7 +266,7 @@ func renderYoutubeChannelInput(
 
 							paint.FillShape(gtx.Ops, c, circle)
 
-							return layout.Dimensions{Size: image.Pt(40, 40)}
+							return layout.Dimensions{Size: image.Pt(25, 25)}
 						},
 					),
 					layout.Rigid(
@@ -338,7 +338,7 @@ func renderTwichChannelInput(
 												clip.Rect{
 													Max: image.Point{
 														X: gtx.Constraints.Max.X,
-														Y: 30,
+														Y: 20,
 													},
 												}.Op(),
 											)
@@ -354,7 +354,7 @@ func renderTwichChannelInput(
 						func(gtx layC) layD {
 							circle := clip.Ellipse{
 								Min: image.Pt(10, 10),
-								Max: image.Pt(30, 30),
+								Max: image.Pt(20, 20),
 							}.Op(gtx.Ops)
 
 							c := color.NRGBA{R: 92, G: 184, B: 92, A: 255}
@@ -367,7 +367,7 @@ func renderTwichChannelInput(
 
 							paint.FillShape(gtx.Ops, c, circle)
 
-							return layout.Dimensions{Size: image.Pt(40, 40)}
+							return layout.Dimensions{Size: image.Pt(25, 25)}
 						},
 					),
 					layout.Rigid(
