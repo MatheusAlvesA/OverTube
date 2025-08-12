@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"overtube/chat_stream"
+	"overtube/save_state"
 	"overtube/ui"
 	"overtube/web_server"
 	"overtube/ws_server"
@@ -12,10 +13,11 @@ import (
 var wsServer = ws_server.CreateServer()
 var webServer = web_server.CreateServer()
 var uiCommandsChan = make(chan ui.UICommand)
+var appState = save_state.Read()
 
 func main() {
 	uiEventChan := make(chan ui.UIEvent)
-	go ui.CreateHomeWindow(uiEventChan, uiCommandsChan)
+	go ui.CreateHomeWindow(uiEventChan, uiCommandsChan, appState)
 	go handleUICommands()
 	orchestrateEvents(uiEventChan)
 	wsServer.Stop()
@@ -66,6 +68,8 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 				}
 			} else {
 				wsServer.AddStream(ytChatStream)
+				appState.YoutubeChannel = v.Channel
+				save_state.Save(appState)
 			}
 		case ui.UIEventSetTwitchChannel:
 			closeChatStream(twChatStream)
@@ -83,6 +87,8 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 				}
 			} else {
 				wsServer.AddStream(twChatStream)
+				appState.TwitchChannel = v.Channel
+				save_state.Save(appState)
 			}
 		case ui.UIEventRemoveYoutubeChannel:
 			wsServer.RemoveAllStreamsFromPlatform(chat_stream.PlatformTypeYoutube)

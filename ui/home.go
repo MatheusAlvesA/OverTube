@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"log"
 	"overtube/chat_stream"
+	"overtube/save_state"
 	"overtube/ws_server"
 	"time"
 
@@ -20,19 +21,19 @@ import (
 	"gioui.org/widget/material"
 )
 
-func CreateHomeWindow(uiEvents chan<- UIEvent, uiCommands <-chan UICommand) {
+func CreateHomeWindow(uiEvents chan<- UIEvent, uiCommands <-chan UICommand, appState *save_state.AppState) {
 	go func() {
 		window := &app.Window{}
 		window.Option(app.Title("OverTube"))
 		window.Option(app.MinSize(400, 300))
-		err := run(window, uiEvents, uiCommands)
+		err := run(window, uiEvents, uiCommands, appState)
 		uiEvents <- UIEventExit{err: err}
 		close(uiEvents)
 	}()
 	app.Main()
 }
 
-func initialState() *UIState {
+func initialState(appState *save_state.AppState) *UIState {
 	state := &UIState{}
 	state.YoutubeChannelURLEditor = &widget.Editor{}
 	state.YoutubeChannelURLEditor.SingleLine = true
@@ -44,12 +45,15 @@ func initialState() *UIState {
 	state.TwitchChannelURLEditor.MaxLen = 60
 	state.TwitchChannelClickable = &widget.Clickable{}
 
+	state.YoutubeChannelSet = appState.YoutubeChannel
+	state.TwitchChannelSet = appState.TwitchChannel
+
 	return state
 }
 
-func run(window *app.Window, uiEvents chan<- UIEvent, uiCommands <-chan UICommand) error {
+func run(window *app.Window, uiEvents chan<- UIEvent, uiCommands <-chan UICommand, appState *save_state.AppState) error {
 	theme := material.NewTheme()
-	state := initialState()
+	state := initialState(appState)
 	go listenToCommands(window, state, uiCommands)
 	go retryEngine(state, uiEvents)
 	var ops op.Ops
