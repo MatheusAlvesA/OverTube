@@ -1,5 +1,6 @@
 var socket = null;
-var emoteMap = new Map();
+var twEmoteMap = new Map();
+var ytEmoteMap = new Map();
 
 function openWebSocket() {
     if(socket != null) return;
@@ -40,17 +41,27 @@ function handleNewCommand(command) {
         socket.send(JSON.stringify({'command': 'pong'}));
     }
     if(command.command === 'setNewUserId' && command.platform == 'twitch') {
-        emoteMap = new Map();
-        fillEmoteMap(emoteMap, command.id);
+        twEmoteMap = new Map();
+        fillTwitchEmoteMap(twEmoteMap, command.id);
     }
     if(command.command === 'setNewUserId' && command.platform == 'youtube') {
-        console.log(command.id);
+        ytEmoteMap = new Map();
+        fillYoutubeEmoteMap(ytEmoteMap, command.id)
     }
 }
 
 
 function handleNewMessage(message) {
-    breakMessage(message, emoteMap);
+    switch (message.platform) {
+        case 'youtube':
+            breakMessage(message, ytEmoteMap);
+            break;
+        case 'twitch':
+            breakMessage(message, twEmoteMap);
+            break;
+        default:
+            break;
+    }
     const node = createMessageNode(message);
     document.getElementById('messagesContainer').appendChild(node);
     deleteOldMessages();

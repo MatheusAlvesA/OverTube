@@ -1,9 +1,14 @@
-async function fillEmoteMap(map, twitchChanId) {
+async function fillTwitchEmoteMap(map, twitchChanId) {
     await getGlobalEmotes(map);
-    await getChannelEmotes(twitchChanId, map);
+    await getTwitchChannelEmotes(twitchChanId, map);
 }
 
-async function getChannelEmotes(twitchChanId, map) {
+async function fillYoutubeEmoteMap(map, ytChanId) {
+    await getGlobalEmotes(map);
+    await getYoutubeChannelEmotes(ytChanId, map);
+}
+
+async function getTwitchChannelEmotes(twitchChanId, map) {
     const bttv = await fetch('https://api.betterttv.net/3/cached/users/twitch/' + twitchChanId);
     const bttvJson = await bttv.json();
     bttvJson.sharedEmotes.forEach(emote => {
@@ -20,6 +25,20 @@ async function getChannelEmotes(twitchChanId, map) {
     const sevenTvJson = await sevenTv.json();
     sevenTvJson.emote_set.emotes.forEach(emote => {
         map.set(emote.name, 'https:' + emote.data.host.url + '/' + emote.data.host.files[1].name);
+    });
+}
+
+async function getYoutubeChannelEmotes(youtubeChanId, map) {
+    const bttv = await fetch('https://api.betterttv.net/3/cached/users/youtube/' + youtubeChanId);
+    const bttvJson = await bttv.json();
+    bttvJson.sharedEmotes.forEach(emote => {
+        map.set(emote.code, 'https://cdn.betterttv.net/emote/' + emote.id + '/2x.' + emote.imageType);
+    });
+
+    const ffz = await fetch('https://api.betterttv.net/3/cached/frankerfacez/users/youtube/' + youtubeChanId);
+    const ffzJson = await ffz.json();
+    ffzJson.forEach(emote => {
+        map.set(emote.code, emote.images['4x']);
     });
 }
 
