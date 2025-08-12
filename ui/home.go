@@ -33,7 +33,7 @@ func CreateHomeWindow(uiEvents chan<- UIEvent, uiCommands <-chan UICommand, appS
 	app.Main()
 }
 
-func initialState(appState *save_state.AppState) *UIState {
+func initialState() *UIState {
 	state := &UIState{}
 	state.YoutubeChannelURLEditor = &widget.Editor{}
 	state.YoutubeChannelURLEditor.SingleLine = true
@@ -45,15 +45,24 @@ func initialState(appState *save_state.AppState) *UIState {
 	state.TwitchChannelURLEditor.MaxLen = 60
 	state.TwitchChannelClickable = &widget.Clickable{}
 
-	state.YoutubeChannelSet = appState.YoutubeChannel
-	state.TwitchChannelSet = appState.TwitchChannel
-
 	return state
+}
+
+func readAppState(state *UIState, appState save_state.AppState) {
+	if len(appState.YoutubeChannel) > 0 {
+		state.YoutubeChannelSet = appState.YoutubeChannel
+		state.YoutubeChannelWasConnected = true
+	}
+	if len(appState.TwitchChannel) > 0 {
+		state.TwitchChannelSet = appState.TwitchChannel
+		state.TwitchChannelWasConnected = true
+	}
 }
 
 func run(window *app.Window, uiEvents chan<- UIEvent, uiCommands <-chan UICommand, appState *save_state.AppState) error {
 	theme := material.NewTheme()
-	state := initialState(appState)
+	state := initialState()
+	readAppState(state, *appState)
 	go listenToCommands(window, state, uiCommands)
 	go retryEngine(state, uiEvents)
 	var ops op.Ops
