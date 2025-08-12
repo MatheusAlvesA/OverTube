@@ -85,3 +85,16 @@ body {
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+
+.message-footer-container {
+    width: 100%;
+    text-align: end;
+    position: relative;
+    height: 0px;
+    overflow: visible;
+    top: -10px;
+}
+
+.platform-icon-img {
+    width: 20px;
+}

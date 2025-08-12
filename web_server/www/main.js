@@ -81,6 +81,7 @@ function createMessageNode(message) {
     container.classList.add('message-container');
     container.appendChild(createHeaderMessageNode(message));
     container.appendChild(createBodyMessageNode(message));
+    container.appendChild(createFooterMessageNode(message));
     return container
 }
 
@@ -128,6 +129,19 @@ function createBodyMessageNode(message) {
             container.appendChild(img);
         }
     });
+    return container
+}
+
+function createFooterMessageNode(message) {
+    const container = document.createElement('div');
+    container.classList.add('message-footer-container');
+    const img = document.createElement('img');
+    img.src = '/platform_icons/yt.png';
+    if(message.platform === 'twitch') {
+        img.src = '/platform_icons/tw.png';
+    }
+    img.classList.add('platform-icon-img');
+    container.appendChild(img);
     return container
 }
 
