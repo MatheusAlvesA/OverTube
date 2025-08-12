@@ -43,6 +43,9 @@ function handleNewCommand(command) {
         emoteMap = new Map();
         fillEmoteMap(emoteMap, command.id);
     }
+    if(command.command === 'setNewUserId' && command.platform == 'youtube') {
+        console.log(command.id);
+    }
 }
 
 

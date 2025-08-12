@@ -24,14 +24,19 @@ func ConnectToYoutubeChat(channelID string) (ChatStreamCon, error) {
 	if err != nil {
 		return nil, err
 	}
+	userId, err := getUserIdFromURL(streamUrl)
+	if err != nil {
+		return nil, err
+	}
 
-	return generateChatStream(channelID, continuationToken)
+	return generateChatStream(channelID, userId, continuationToken)
 }
 
-func generateChatStream(channelID string, continuationToken string) (ChatStreamCon, error) {
-	log.Println("Starting YouTube chat stream for channel:", channelID)
+func generateChatStream(channelID string, userId string, continuationToken string) (ChatStreamCon, error) {
+	log.Println("Starting YouTube chat stream for channel:", channelID, "with user ID:", userId)
 	con := &YTChatStreamCon{
 		ChannelID:         channelID,
+		UserID:            userId,
 		stream:            make(chan ChatStreamMessage, ChatStreamMessageBufferSize),
 		ContinuationToken: continuationToken,
 		LastStreamUpdate:  0,
@@ -383,6 +388,32 @@ func getContinuationFromURL(streamUrl string) (string, error) {
 	}
 
 	return string(body)[index-1 : index+endIndex], nil
+}
+
+func getUserIdFromURL(streamUrl string) (string, error) {
+	resp, err := http.Get(streamUrl)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", http.ErrNotSupported
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	index := strings.Index(string(body), "\"externalChannelId\":\"")
+	if index < 0 {
+		return "", &CustomError{message: "User ID not found in response"}
+	}
+	index += 21 // Length of the string before the user ID value
+	endIndex := strings.Index(string(body)[index:], "\"")
+	if endIndex < 0 {
+		return "", &CustomError{message: "End of user ID not found"}
+	}
+
+	return string(body)[index : index+endIndex], nil
 }
 
 func getContinuationFromAllChat(continuationToken string) (string, error) {

@@ -65,6 +65,7 @@ type ChatStreamCon interface {
 
 type YTChatStreamCon struct {
 	ChannelID         string
+	UserID            string
 	ContinuationToken string
 	LastStreamUpdate  int64
 	stream            chan ChatStreamMessage
@@ -86,7 +87,7 @@ func (c *YTChatStreamCon) GetPlatform() PlatformType {
 	return PlatformTypeYoutube
 }
 func (c *YTChatStreamCon) GetUserId() string {
-	return c.ChannelID
+	return c.UserID
 }
 
 type TWChatStreamCon struct {
