@@ -28,9 +28,11 @@ body {
 }
 
 .message-emote-img {
-    width: 20px;
+    height: 25px;
+    width: auto;
     vertical-align: middle;
     margin-left: 5px;
+    margin-right: 5px;
 }
 
 .message-container {

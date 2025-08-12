@@ -59,7 +59,7 @@ function breakMessage(message, map) {
                 if(currentTextAccumulator !== '') {
                     parts.push({
                         PartType: 'text',
-                        Text: currentTextAccumulator.trim(),
+                        Text: currentTextAccumulator.slice(0, -1),
                         EmoteName: '',
                         EmoteImgUrl: '',
                     });
@@ -78,7 +78,7 @@ function breakMessage(message, map) {
         if(currentTextAccumulator !== '') {
             parts.push({
                 PartType: 'text',
-                Text: currentTextAccumulator.trim(),
+                Text: currentTextAccumulator.slice(0, -1),
                 EmoteName: '',
                 EmoteImgUrl: '',
             });
