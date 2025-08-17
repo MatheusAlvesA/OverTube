@@ -3,13 +3,19 @@ package ui
 import (
 	"image"
 	"image/color"
+	"image/draw"
+	"image/png"
+	"io"
 	"log"
+	"os"
 	"overtube/chat_stream"
 	"overtube/save_state"
 	"overtube/ws_server"
+	"strings"
 	"time"
 
 	"gioui.org/app"
+	"gioui.org/io/clipboard"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -44,6 +50,8 @@ func initialState() *UIState {
 	state.TwitchChannelURLEditor.SingleLine = true
 	state.TwitchChannelURLEditor.MaxLen = 60
 	state.TwitchChannelClickable = &widget.Clickable{}
+
+	state.CopyLinkToChatClickable = &widget.Clickable{}
 
 	return state
 }
@@ -86,6 +94,7 @@ func run(window *app.Window, uiEvents chan<- UIEvent, uiCommands <-chan UIComman
 				renderTitle(theme),
 				renderYoutubeChannelInput(theme, state),
 				renderTwichChannelInput(theme, state),
+				renderBtnCopyLinkToChat(theme, state),
 			)
 
 			e.Frame(gtx.Ops)
@@ -179,7 +188,16 @@ func emitEvents(gtx layC, state *UIState, uiEvents chan<- UIEvent) {
 		}
 	}
 
-	if state.YouTubeChannelClickable.Hovered() || state.TwitchChannelClickable.Hovered() {
+	if state.CopyLinkToChatClickable.Clicked(gtx) {
+		gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader("http://localhost:1337"))})
+		state.CopyLinkToChatCopied = true
+		go func() {
+			time.Sleep(time.Second * 2)
+			state.CopyLinkToChatCopied = false
+		}()
+	}
+
+	if state.YouTubeChannelClickable.Hovered() || state.TwitchChannelClickable.Hovered() || state.CopyLinkToChatClickable.Hovered() {
 		pointer.CursorPointer.Add(gtx.Ops)
 	}
 }
@@ -233,6 +251,34 @@ func renderYoutubeChannelInput(
 					Alignment: layout.Middle,
 				}.Layout(
 					gtx,
+					layout.Rigid(
+						func(gtx layC) layD {
+							return layout.Inset{Right: unit.Dp(10)}.Layout(gtx, func(gtx layC) layD {
+								// Image of youtube logo
+								file, err := os.Open("web_server/www/platform_icons/yt.png")
+								if err != nil {
+									// Fallback: create a red square if image loading fails
+									img := image.NewRGBA(image.Rect(0, 0, 25, 25))
+									draw.Draw(img, img.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
+									return widget.Image{Src: paint.NewImageOp(img)}.Layout(gtx)
+								}
+								defer file.Close()
+
+								img, err := png.Decode(file)
+								if err != nil {
+									// Fallback: create a red square if image decoding fails
+									fallbackImg := image.NewRGBA(image.Rect(0, 0, 25, 25))
+									draw.Draw(fallbackImg, fallbackImg.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
+									return widget.Image{Src: paint.NewImageOp(fallbackImg)}.Layout(gtx)
+								}
+
+								return widget.Image{
+									Src:   paint.NewImageOp(img),
+									Scale: 0.6,
+								}.Layout(gtx)
+							})
+						},
+					),
 					layout.Flexed(
 						1,
 						func(gtx layC) layD {
@@ -334,6 +380,34 @@ func renderTwichChannelInput(
 					Alignment: layout.Middle,
 				}.Layout(
 					gtx,
+					layout.Rigid(
+						func(gtx layC) layD {
+							return layout.Inset{Right: unit.Dp(10)}.Layout(gtx, func(gtx layC) layD {
+								// Image of youtube logo
+								file, err := os.Open("web_server/www/platform_icons/tw.png")
+								if err != nil {
+									// Fallback: create a red square if image loading fails
+									img := image.NewRGBA(image.Rect(0, 0, 25, 25))
+									draw.Draw(img, img.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
+									return widget.Image{Src: paint.NewImageOp(img)}.Layout(gtx)
+								}
+								defer file.Close()
+
+								img, err := png.Decode(file)
+								if err != nil {
+									// Fallback: create a red square if image decoding fails
+									fallbackImg := image.NewRGBA(image.Rect(0, 0, 25, 25))
+									draw.Draw(fallbackImg, fallbackImg.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
+									return widget.Image{Src: paint.NewImageOp(fallbackImg)}.Layout(gtx)
+								}
+
+								return widget.Image{
+									Src:   paint.NewImageOp(img),
+									Scale: 0.45,
+								}.Layout(gtx)
+							})
+						},
+					),
 					layout.Flexed(
 						1,
 						func(gtx layC) layD {
@@ -389,6 +463,49 @@ func renderTwichChannelInput(
 								gtx,
 								func(gtx layC) layD {
 									return submitUI.Layout(gtx)
+								},
+							)
+						},
+					),
+				)
+			})
+		},
+	)
+}
+
+func renderBtnCopyLinkToChat(
+	theme *material.Theme,
+	state *UIState,
+) layout.FlexChild {
+	btnUI := material.Button(theme, state.CopyLinkToChatClickable, "Copy Link to Chat")
+
+	if state.CopyLinkToChatCopied {
+		btnUI.Text = "Copied!"
+	}
+
+	return layout.Rigid(
+		func(gtx layC) layD {
+			return layout.Inset{
+				Top:    unit.Dp(16),
+				Left:   unit.Dp(16),
+				Right:  unit.Dp(16),
+				Bottom: unit.Dp(16),
+			}.Layout(gtx, func(gtx layC) layD {
+				return layout.Flex{
+					Axis:      layout.Horizontal,
+					Spacing:   layout.SpaceBetween,
+					Alignment: layout.Middle,
+				}.Layout(
+					gtx,
+					layout.Rigid(
+						func(gtx layC) layD {
+							return layout.Inset{Left: unit.Dp(8)}.Layout(
+								gtx,
+								func(gtx layC) layD {
+									// Define largura fixa para o botão
+									gtx.Constraints.Min.X = gtx.Dp(unit.Dp(150))
+									gtx.Constraints.Max.X = gtx.Dp(unit.Dp(150))
+									return btnUI.Layout(gtx)
 								},
 							)
 						},

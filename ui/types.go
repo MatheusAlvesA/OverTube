@@ -65,5 +65,8 @@ type UIState struct {
 	TwitchConnStatus          ws_server.ChannelConnectionStatus
 	TwitchChannelWasConnected bool
 
+	CopyLinkToChatClickable *widget.Clickable
+	CopyLinkToChatCopied    bool
+
 	UIClosed bool
 }
