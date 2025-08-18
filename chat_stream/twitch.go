@@ -119,7 +119,6 @@ func fillBadgesDatabase(con *TWChatStreamCon) {
 
 	con.badgesDB = badges
 
-	// Fill custom badges from Twitch API in a separate goroutine for optimal performance
 	fillCustomBadgesDatabase(con)
 }
 

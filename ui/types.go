@@ -52,6 +52,12 @@ type UIEventRemoveTwitchChannel struct{}
 func (e UIEventRemoveYoutubeChannel) GetError() error { return nil }
 func (e UIEventRemoveTwitchChannel) GetError() error  { return nil }
 
+type UIEventSetChatStyle struct {
+	Id uint
+}
+
+func (e UIEventSetChatStyle) GetError() error { return nil }
+
 type UIState struct {
 	YoutubeChannelURLEditor    *widget.Editor
 	YouTubeChannelClickable    *widget.Clickable
@@ -68,5 +74,12 @@ type UIState struct {
 	CopyLinkToChatClickable *widget.Clickable
 	CopyLinkToChatCopied    bool
 
+	ChatStyleId         uint
+	ChatStyleClickables map[uint]*widget.Clickable
+
 	UIClosed bool
+}
+
+func (s *UIState) GetChatStyleClickable(id uint) *widget.Clickable {
+	return s.ChatStyleClickables[id]
 }

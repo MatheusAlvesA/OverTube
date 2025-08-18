@@ -48,6 +48,9 @@ function handleNewCommand(command) {
         ytEmoteMap = new Map();
         fillYoutubeEmoteMap(ytEmoteMap, command.id)
     }
+    if(command.command === 'refresh') {
+        window.location.reload();
+    }
 }
 
 

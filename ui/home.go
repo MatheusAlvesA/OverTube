@@ -10,6 +10,7 @@ import (
 	"os"
 	"overtube/chat_stream"
 	"overtube/save_state"
+	"overtube/web_server"
 	"overtube/ws_server"
 	"strings"
 	"time"
@@ -53,6 +54,12 @@ func initialState() *UIState {
 
 	state.CopyLinkToChatClickable = &widget.Clickable{}
 
+	state.ChatStyleId = 1
+	state.ChatStyleClickables = make(map[uint]*widget.Clickable)
+	for _, style := range web_server.GetChatStyleOptions() {
+		state.ChatStyleClickables[style.Id] = &widget.Clickable{}
+	}
+
 	return state
 }
 
@@ -64,6 +71,9 @@ func readAppState(state *UIState, appState save_state.AppState) {
 	if len(appState.TwitchChannel) > 0 {
 		state.TwitchChannelSet = appState.TwitchChannel
 		state.TwitchChannelWasConnected = true
+	}
+	if appState.ChatStyleId > 0 {
+		state.ChatStyleId = appState.ChatStyleId
 	}
 }
 
@@ -96,6 +106,7 @@ func run(window *app.Window, uiEvents chan<- UIEvent, uiCommands <-chan UIComman
 				renderTwichChannelInput(theme, state),
 				renderBtnCopyLinkToChat(theme, state),
 				renderCustomSectionLineSeparator(theme),
+				renderCustomizeSection(theme, state),
 			)
 
 			e.Frame(gtx.Ops)
@@ -201,6 +212,18 @@ func emitEvents(gtx layC, state *UIState, uiEvents chan<- UIEvent) {
 	if state.YouTubeChannelClickable.Hovered() || state.TwitchChannelClickable.Hovered() || state.CopyLinkToChatClickable.Hovered() {
 		pointer.CursorPointer.Add(gtx.Ops)
 	}
+
+	for id, clickable := range state.ChatStyleClickables {
+		if clickable.Clicked(gtx) {
+			state.ChatStyleId = id
+			uiEvents <- UIEventSetChatStyle{
+				Id: id,
+			}
+		}
+		if clickable.Hovered() {
+			pointer.CursorPointer.Add(gtx.Ops)
+		}
+	}
 }
 
 func renderTitle(theme *material.Theme) layout.FlexChild {
@@ -225,10 +248,10 @@ func renderYoutubeChannelInput(
 	editorUI.LineHeight = 1.5
 
 	submit := state.YouTubeChannelClickable
-	submitUI := material.Button(theme, submit, "Set Channel")
+	submitUI := material.Button(theme, submit, "Definir")
 
 	if state.YoutubeChannelSet != "" {
-		submitUI.Text = "Remove"
+		submitUI.Text = "Remover"
 	}
 
 	if state.YoutubeChannelURLEditor.Text() == "" {
@@ -350,14 +373,14 @@ func renderTwichChannelInput(
 	state *UIState,
 ) layout.FlexChild {
 	editor := state.TwitchChannelURLEditor
-	editorUI := material.Editor(theme, editor, "Twitch username of channel")
+	editorUI := material.Editor(theme, editor, "Twitch username")
 	editorUI.LineHeight = 1.5
 
 	submit := state.TwitchChannelClickable
-	submitUI := material.Button(theme, submit, "Set Channel")
+	submitUI := material.Button(theme, submit, "Definir")
 
 	if state.TwitchChannelSet != "" {
-		submitUI.Text = "Remove"
+		submitUI.Text = "Remover"
 	}
 
 	if state.TwitchChannelURLEditor.Text() == "" {
@@ -478,7 +501,7 @@ func renderBtnCopyLinkToChat(
 	theme *material.Theme,
 	state *UIState,
 ) layout.FlexChild {
-	btnUI := material.Button(theme, state.CopyLinkToChatClickable, "Copy Link to Chat")
+	btnUI := material.Button(theme, state.CopyLinkToChatClickable, "Copiar link para o chat")
 
 	if state.CopyLinkToChatCopied {
 		btnUI.Text = "Copied!"
@@ -504,8 +527,8 @@ func renderBtnCopyLinkToChat(
 								gtx,
 								func(gtx layC) layD {
 									// Define largura fixa para o botão
-									gtx.Constraints.Min.X = gtx.Dp(unit.Dp(150))
-									gtx.Constraints.Max.X = gtx.Dp(unit.Dp(150))
+									gtx.Constraints.Min.X = gtx.Dp(unit.Dp(200))
+									gtx.Constraints.Max.X = gtx.Dp(unit.Dp(200))
 									return btnUI.Layout(gtx)
 								},
 							)

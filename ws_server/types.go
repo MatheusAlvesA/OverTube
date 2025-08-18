@@ -222,6 +222,15 @@ func (s *WSChatStreamServer) AddStream(stream chat_stream.ChatStreamCon) {
 	s.sendNewUserIdForAllClents(stream)
 }
 
+func (s *WSChatStreamServer) RefreshClients() {
+	for _, conn := range s.conns {
+		conn.Send(map[string]any{
+			"type":    "cmd",
+			"command": "refresh",
+		})
+	}
+}
+
 func (s *WSChatStreamServer) RemoveStream(i int) {
 	s.StatusEventChan <- ChannelConnectionStatusEvent{
 		Platform: s.srcStreams[i].GetPlatform(),

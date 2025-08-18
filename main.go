@@ -99,6 +99,11 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 		case ui.UIEventRemoveTwitchChannel:
 			wsServer.RemoveAllStreamsFromPlatform(chat_stream.PlatformTypeTwitch)
 			closeChatStream(twChatStream)
+		case ui.UIEventSetChatStyle:
+			webServer.SetSelectedChatStyle(web_server.GetChatStyleFromId(v.Id))
+			appState.ChatStyleId = v.Id
+			save_state.Save(appState)
+			wsServer.RefreshClients()
 		case ui.UIEventExit:
 			log.Println("User exited")
 		default:

@@ -34,10 +34,13 @@ func (s *WebChatStreamServer) Start() bool {
 	http.Handle("/", http.FileServer(http.FS(staticFiles)))
 	http.Handle("/styles.css", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/css")
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
 		if s.selectedChatStyle == nil {
 			w.Write([]byte(""))
 		} else {
-			w.Write([]byte(s.selectedChatStyle.css))
+			w.Write([]byte(s.selectedChatStyle.CSS))
 		}
 	}))
 	go s.srv.ListenAndServe()
@@ -53,7 +56,7 @@ func (s *WebChatStreamServer) Stop() {
 }
 
 type ChatStyleOption struct {
-	id    uint
-	label string
-	css   string
+	Id    uint
+	Label string
+	CSS   string
 }
