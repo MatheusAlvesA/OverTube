@@ -520,7 +520,7 @@ func renderBtnCopyLinkToChat(
 func renderCustomSectionLineSeparator(theme *material.Theme) layout.FlexChild {
 	return layout.Rigid(
 		func(gtx layC) layD {
-			title := material.Label(theme, unit.Sp(16), "Customization")
+			title := material.Label(theme, unit.Sp(16), "Customização")
 			title.Color = color.NRGBA{R: 127, G: 127, B: 127, A: 255}
 
 			return layout.Flex{

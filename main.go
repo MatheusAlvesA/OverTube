@@ -41,6 +41,9 @@ func handleUICommands() {
 func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 	var ytChatStream chat_stream.ChatStreamCon = nil
 	var twChatStream chat_stream.ChatStreamCon = nil
+
+	webServer.SetSelectedChatStyle(web_server.GetChatStyleFromId(appState.ChatStyleId))
+
 	for {
 		event, more := <-uiEventChan
 		if !more {

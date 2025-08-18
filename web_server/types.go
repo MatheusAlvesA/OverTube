@@ -14,8 +14,13 @@ import (
 var content embed.FS
 
 type WebChatStreamServer struct {
-	Port uint
-	srv  *http.Server
+	Port              uint
+	srv               *http.Server
+	selectedChatStyle *ChatStyleOption
+}
+
+func (s *WebChatStreamServer) SetSelectedChatStyle(style *ChatStyleOption) {
+	s.selectedChatStyle = style
 }
 
 func (s *WebChatStreamServer) Start() bool {
@@ -27,6 +32,14 @@ func (s *WebChatStreamServer) Start() bool {
 		return false
 	}
 	http.Handle("/", http.FileServer(http.FS(staticFiles)))
+	http.Handle("/styles.css", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/css")
+		if s.selectedChatStyle == nil {
+			w.Write([]byte(""))
+		} else {
+			w.Write([]byte(s.selectedChatStyle.css))
+		}
+	}))
 	go s.srv.ListenAndServe()
 	return true
 }
@@ -37,4 +50,10 @@ func (s *WebChatStreamServer) Stop() {
 		defer cancel()
 		s.srv.Shutdown(ctx)
 	}
+}
+
+type ChatStyleOption struct {
+	id    uint
+	label string
+	css   string
 }

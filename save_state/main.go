@@ -26,6 +26,7 @@ func Read() *AppState {
 	defaultState := &AppState{
 		YoutubeChannel: "",
 		TwitchChannel:  "",
+		ChatStyleId:    1,
 	}
 
 	dataJson, err := os.ReadFile("state.json")
@@ -33,12 +34,25 @@ func Read() *AppState {
 		log.Println("[save_state::Read] Fail to read file", err)
 		return defaultState
 	}
-	var readedState *AppState
-	err = json.Unmarshal(dataJson, &readedState)
+	var readedData map[string]any
+	err = json.Unmarshal(dataJson, &readedData)
 	if err != nil {
 		log.Println("[save_state::Read] Fail parse file content", err)
 		return defaultState
 	}
 
+	readedState := &AppState{
+		YoutubeChannel: getDataOrDefault(readedData, "YoutubeChannel", "").(string),
+		TwitchChannel:  getDataOrDefault(readedData, "TwitchChannel", "").(string),
+		ChatStyleId:    uint(getDataOrDefault(readedData, "ChatStyleId", float64(1)).(float64)),
+	}
+
 	return readedState
+}
+
+func getDataOrDefault(readedData map[string]any, key string, defaultValue any) any {
+	if readedData[key] == nil {
+		return defaultValue
+	}
+	return readedData[key]
 }
