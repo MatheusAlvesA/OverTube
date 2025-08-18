@@ -95,6 +95,7 @@ func run(window *app.Window, uiEvents chan<- UIEvent, uiCommands <-chan UIComman
 				renderYoutubeChannelInput(theme, state),
 				renderTwichChannelInput(theme, state),
 				renderBtnCopyLinkToChat(theme, state),
+				renderCustomSectionLineSeparator(theme),
 			)
 
 			e.Frame(gtx.Ops)
@@ -512,6 +513,51 @@ func renderBtnCopyLinkToChat(
 					),
 				)
 			})
+		},
+	)
+}
+
+func renderCustomSectionLineSeparator(theme *material.Theme) layout.FlexChild {
+	return layout.Rigid(
+		func(gtx layC) layD {
+			title := material.Label(theme, unit.Sp(16), "Customization")
+			title.Color = color.NRGBA{R: 127, G: 127, B: 127, A: 255}
+
+			return layout.Flex{
+				Axis:      layout.Vertical,
+				Spacing:   layout.SpaceStart,
+				Alignment: layout.Start,
+			}.Layout(gtx,
+				layout.Rigid(func(gtx layC) layD {
+					return layout.Inset{
+						Top:    unit.Dp(0),
+						Left:   unit.Dp(16),
+						Right:  unit.Dp(0),
+						Bottom: unit.Dp(0),
+					}.Layout(gtx, func(gtx layC) layD {
+						return title.Layout(gtx)
+					})
+				}),
+				layout.Rigid(func(gtx layC) layD {
+					return layout.Inset{
+						Top:    unit.Dp(2),
+						Left:   unit.Dp(16),
+						Right:  unit.Dp(16),
+						Bottom: unit.Dp(16),
+					}.Layout(gtx, func(gtx layC) layD {
+						paint.FillShape(gtx.Ops,
+							color.NRGBA{R: 220, G: 220, B: 220, A: 255},
+							clip.Rect{
+								Max: image.Point{
+									X: gtx.Constraints.Max.X,
+									Y: 2,
+								},
+							}.Op(),
+						)
+						return layout.Dimensions{Size: image.Pt(gtx.Constraints.Max.X, 2)}
+					})
+				}),
+			)
 		},
 	)
 }
