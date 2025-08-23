@@ -82,6 +82,7 @@ function deleteOldMessages() {
 function createMessageNode(message) {
     const container = document.createElement('div');
     container.classList.add('message-container');
+    container.appendChild(createOuterPlatformMessageNode(message));
     container.appendChild(createHeaderMessageNode(message));
     container.appendChild(createBodyMessageNode(message));
     container.appendChild(createFooterMessageNode(message));
@@ -92,7 +93,7 @@ function createHeaderMessageNode(message) {
     const container = document.createElement('div');
     container.classList.add('message-head-container');
 
-    container.appendChild(createHeadePlatformMessageNode(message));
+    container.appendChild(createHeaderPlatformMessageNode(message));
     container.appendChild(createHeadeBadgesMessageNode(message));
 
     const name = document.createElement('div');
@@ -103,7 +104,21 @@ function createHeaderMessageNode(message) {
     return container
 }
 
-function createHeadePlatformMessageNode(message) {
+function createOuterPlatformMessageNode(message) {
+    const container = document.createElement('div');
+    container.classList.add('message-outer-platform-icon-container');
+    const img = document.createElement('img');
+    img.src = '/platform_icons/yt.png';
+    if(message.platform === 'twitch') {
+        img.src = '/platform_icons/tw.png';
+    }
+    img.classList.add('outer-platform-icon-img');
+    container.appendChild(img);
+
+    return container
+}
+
+function createHeaderPlatformMessageNode(message) {
     const container = document.createElement('div');
     container.classList.add('message-header-platform-icon-container');
     const img = document.createElement('img');

@@ -22,7 +22,7 @@ func GetChatStyleOptions() []ChatStyleOption {
 		{
 			Id:    4,
 			Label: "Simples chique",
-			CSS:   getCss("default"),
+			CSS:   getCss("simple-chic"),
 		},
 	}
 }

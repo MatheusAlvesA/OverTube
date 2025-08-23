@@ -67,6 +67,7 @@ body {
     border-radius: 12px;
     color: white;
     word-wrap: break-word;
+    font-size: 18px;
 }
 
 .message-head-badges-container {
@@ -102,3 +103,8 @@ body {
 .message-header-platform-icon-container {
     display: none;
 }
+
+.message-outer-platform-icon-container {
+    display: none;
+}
+
