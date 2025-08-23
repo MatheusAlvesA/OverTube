@@ -17,7 +17,7 @@ func GetChatStyleOptions() []ChatStyleOption {
 		{
 			Id:    3,
 			Label: "Simples",
-			CSS:   getCss("default"),
+			CSS:   getCss("simple"),
 		},
 		{
 			Id:    4,
