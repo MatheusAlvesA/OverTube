@@ -92,7 +92,8 @@ function createHeaderMessageNode(message) {
     const container = document.createElement('div');
     container.classList.add('message-head-container');
 
-    container.appendChild(createHeadeBadgesrMessageNode(message));
+    container.appendChild(createHeadePlatformMessageNode(message));
+    container.appendChild(createHeadeBadgesMessageNode(message));
 
     const name = document.createElement('div');
     name.classList.add('message-head-name');
@@ -102,7 +103,21 @@ function createHeaderMessageNode(message) {
     return container
 }
 
-function createHeadeBadgesrMessageNode(message) {
+function createHeadePlatformMessageNode(message) {
+    const container = document.createElement('div');
+    container.classList.add('message-header-platform-icon-container');
+    const img = document.createElement('img');
+    img.src = '/platform_icons/yt.png';
+    if(message.platform === 'twitch') {
+        img.src = '/platform_icons/tw.png';
+    }
+    img.classList.add('badge-platform-icon-img');
+    container.appendChild(img);
+
+    return container
+}
+
+function createHeadeBadgesMessageNode(message) {
     const container = document.createElement('div');
     container.classList.add('message-head-badges-container');
 

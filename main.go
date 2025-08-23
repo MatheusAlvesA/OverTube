@@ -94,9 +94,13 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 				save_state.Save(appState)
 			}
 		case ui.UIEventRemoveYoutubeChannel:
+			appState.YoutubeChannel = ""
+			save_state.Save(appState)
 			wsServer.RemoveAllStreamsFromPlatform(chat_stream.PlatformTypeYoutube)
 			closeChatStream(ytChatStream)
 		case ui.UIEventRemoveTwitchChannel:
+			appState.TwitchChannel = ""
+			save_state.Save(appState)
 			wsServer.RemoveAllStreamsFromPlatform(chat_stream.PlatformTypeTwitch)
 			closeChatStream(twChatStream)
 		case ui.UIEventSetChatStyle:

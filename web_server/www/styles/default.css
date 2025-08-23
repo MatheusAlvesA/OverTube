@@ -98,3 +98,7 @@ body {
 .platform-icon-img {
     width: 20px;
 }
+
+.message-header-platform-icon-container {
+    display: none;
+}
