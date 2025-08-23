@@ -1,10 +1,13 @@
 package ui
 
 import (
+	"image"
 	"overtube/chat_stream"
 	"overtube/ws_server"
 
 	"gioui.org/layout"
+	"gioui.org/op"
+	"gioui.org/unit"
 	"gioui.org/widget"
 )
 
@@ -82,4 +85,46 @@ type UIState struct {
 
 func (s *UIState) GetChatStyleClickable(id uint) *widget.Clickable {
 	return s.ChatStyleClickables[id]
+}
+
+// Flow implementa um container com quebra de linha
+type Flow struct {
+	Spacing unit.Dp
+}
+
+func (f Flow) Layout(gtx layout.Context, children ...layout.Widget) layout.Dimensions {
+	spacing := gtx.Dp(f.Spacing)
+	cs := gtx.Constraints
+	x, y := spacing, 0
+	rowHeight := 0
+
+	var maxY int
+
+	for _, child := range children {
+		// mede o tamanho do filho
+		macro := op.Record(gtx.Ops)
+		dims := child(gtx)
+		c := macro.Stop()
+
+		if x+dims.Size.X+spacing > cs.Max.X {
+			// quebra de linha
+			x = spacing
+			y += rowHeight + spacing
+			rowHeight = 0
+		}
+		trans := op.Offset(image.Pt(x, y)).Push(gtx.Ops)
+		c.Add(gtx.Ops)
+		trans.Pop()
+
+		// Atualiza a posição para o próximo elemento
+		x += dims.Size.X + spacing
+		if dims.Size.Y > rowHeight {
+			rowHeight = dims.Size.Y
+		}
+		if y+rowHeight > maxY {
+			maxY = y + rowHeight
+		}
+	}
+
+	return layout.Dimensions{Size: image.Pt(cs.Max.X, maxY)}
 }
