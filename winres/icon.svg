@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" width="100%" height="100%" viewBox="200 200" preserveAspectRatio="xMidYMid meet" color-interpolation-filters="sRGB">
+	<g>
+		<g fill="#ffecd2" hollow-target="textRect">
+			<g transform="translate(7,0)" mask="url(#fc353368-958b-4ce2-9d52-a5af1f8ac769)">
+				<g>
+					<rect fill="#ffecd2" fill-opacity="0" stroke-width="2" x="0" y="0" width="137.5" height="137.61008807045636" class="image-rect"/>
+					<svg x="0" y="0" width="137.5" height="137.61008807045636" filtersec="colorsb7008333963" class="image-svg-svg primary" style="overflow: visible;">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="5.015323638916016 4.975105285644531 89.96699523925781 90.03902435302734" x="0px" y="0px">
+							<path d="m 49.998819,4.9751055 c -24.821867,0 -44.9834934,20.1710675 -44.9834934,45.0195135 0,24.848447 20.1616264,45.019514 44.9834934,45.019514 24.821866,0 44.983493,-20.171067 44.983493,-45.019514 0,-24.848446 -20.161627,-45.0195135 -44.983493,-45.0195135 z m 0,3.0318545 c 23.226908,0 42.019464,18.787331 42.019464,41.987659 0,23.200328 -18.792556,41.987659 -42.019464,41.987659 -23.226908,0 -42.0194648,-18.787331 -42.0194648,-41.987659 0,-23.200328 18.7925568,-41.987659 42.0194648,-41.987659 z" color="#000"/>
+						</svg>
+					</svg>
+				</g>
+				<rect v-gra="id" width="149.5" height="149.61009216308594" transform="translate(-6, -6)" style="pointer-events:none;" fill="url(#pM0pVU54nWOFAiHdkyexT)"/>
+			</g>
+			<g transform="translate(0,35)">
+				<g data-gra="path-name" fill-rule="" class="tp-name" fill="url(#5b23748d-966e-49d1-a9c6-45e27920e226)">
+					<g transform="scale(1.2)">
+						<g>
+							<path d="M30.07 0.22C45.07 0.22 57.23-12.38 57.23-28.05 57.23-43.65 45.07-56.25 30.07-56.25 15-56.25 2.85-43.65 2.85-28.05 2.85-12.38 15 0.22 30.07 0.22ZM30.07-11.32C21.15-11.32 14.03-18.75 14.03-28.05 14.03-37.27 21.15-44.7 30.07-44.7 38.92-44.7 46.05-37.27 46.05-28.05 46.05-18.75 38.92-11.32 30.07-11.32ZM100.95-45.98L100.95-56.25 57.45-56.25 57.45-45.98 74.1-45.98 74.1 0 84.3 0 84.3-45.98Z" transform="translate(-2.8499999046325684, 56.25)"/>
+						</g>
+					</g>
+				</g>
+			</g>
+		</g>
+	</g>
+	<mask id="cc2a4271-d8f2-453f-8807-c799d3892d3f">
+		<g fill="white">
+			<g>
+				<rect fill-opacity="1" stroke-width="2" x="0" y="0" width="137.5" height="137.61008807045636" class="image-rect"/>
+				<svg x="0" y="0" width="137.5" height="137.61008807045636" filtersec="colorsb7008333963" class="image-svg-svg primary" style="overflow: visible;">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="5.015323638916016 4.975105285644531 89.96699523925781 90.03902435302734" x="0px" y="0px">
+						<path d="m 49.998819,4.9751055 c -24.821867,0 -44.9834934,20.1710675 -44.9834934,45.0195135 0,24.848447 20.1616264,45.019514 44.9834934,45.019514 24.821866,0 44.983493,-20.171067 44.983493,-45.019514 0,-24.848446 -20.161627,-45.0195135 -44.983493,-45.0195135 z m 0,3.0318545 c 23.226908,0 42.019464,18.787331 42.019464,41.987659 0,23.200328 -18.792556,41.987659 -42.019464,41.987659 -23.226908,0 -42.0194648,-18.787331 -42.0194648,-41.987659 0,-23.200328 18.7925568,-41.987659 42.0194648,-41.987659 z" color="#000"/>
+					</svg>
+				</svg>
+			</g>
+		</g>
+		<g transform="translate(-7.299999237060547,42.57004356384277)">
+			<rect fill="black" fill-opacity="1" x="-3.5" y="-3.5" width="105.0999984741211" height="63.47000503540039"/>
+			<rect fill="black" fill-opacity="1" x="-3.5" y="-3.5"/>
+		</g>
+		<g transform="translate(-7.299999237060547,42.57004356384277)" fill="black">
+			<g data-gra="path-name" fill-rule="" class="tp-name">
+				<g transform="scale(1)">
+					<g>
+						<path d="M30.07 0.22C45.07 0.22 57.23-12.38 57.23-28.05 57.23-43.65 45.07-56.25 30.07-56.25 15-56.25 2.85-43.65 2.85-28.05 2.85-12.38 15 0.22 30.07 0.22ZM30.07-11.32C21.15-11.32 14.03-18.75 14.03-28.05 14.03-37.27 21.15-44.7 30.07-44.7 38.92-44.7 46.05-37.27 46.05-28.05 46.05-18.75 38.92-11.32 30.07-11.32ZM100.95-45.98L100.95-56.25 57.45-56.25 57.45-45.98 74.1-45.98 74.1 0 84.3 0 84.3-45.98Z" transform="translate(-2.8499999046325684, 56.25)"/>
+					</g>
+				</g>
+			</g>
+		</g>
+	</mask>
+	<defs v-gra="od">
+		<linearGradient x1="0" y1="1" x2="0" y2="0" id="5b23748d-966e-49d1-a9c6-45e27920e226">
+			<stop offset="0%" stop-color="#6A0066"/><stop offset="100%" stop-color="#FF0066"/>
+		</linearGradient>
+		<filter id="42443b3f1de60f6b6fd3b6a9844b4764" filterUnits="objectBoundingBox">
+			<feColorMatrix type="matrix" values="0 0 0 0 0.99609375  0 0 0 0 0.99609375  0 0 0 0 0.99609375  0 0 0 1 0"/>
+		</filter>
+	</defs>
+	<defs v-gra="id">
+		<filter id="bdc7dca0-db10-4045-8ec5-ec9eb1e405be" filterUnits="userSpaceOnUse">
+			<feColorMatrix type="matrix" values="0 0 0 0 0.99609375  0 0 0 0 0.99609375  0 0 0 0 0.99609375  0 0 0 1 0"/>
+		</filter>
+		<linearGradient x1="0" y1="1" x2="0" y2="0" id="pM0pVU54nWOFAiHdkyexT">
+			<stop offset="0%" stop-color="#6A0066"/>
+			<stop offset="100%" stop-color="#FF0066"/>
+		</linearGradient>
+		<filter id="42443b3f1de60f6b6fd3b6a9844b4764" filterUnits="objectBoundingBox">
+			<feColorMatrix type="matrix" values="0 0 0 0 0.99609375  0 0 0 0 0.99609375  0 0 0 0 0.99609375  0 0 0 1 0"/>
+		</filter>
+	</defs>
+	<mask v-gra="im" id="fc353368-958b-4ce2-9d52-a5af1f8ac769">
+		<g mask="url(#cc2a4271-d8f2-453f-8807-c799d3892d3f)" filter="url(#bdc7dca0-db10-4045-8ec5-ec9eb1e405be)">
+			<g>
+				<rect fill="#ffecd2" fill-opacity="0" stroke-width="2" x="0" y="0" width="137.5" height="137.61008807045636" class="image-rect"/>
+				<svg x="0" y="0" width="137.5" height="137.61008807045636" filtersec="colorsb7008333963" class="image-svg-svg primary" style="overflow: visible;">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="5.015323638916016 4.975105285644531 89.96699523925781 90.03902435302734" x="0px" y="0px">
+						<path d="m 49.998819,4.9751055 c -24.821867,0 -44.9834934,20.1710675 -44.9834934,45.0195135 0,24.848447 20.1616264,45.019514 44.9834934,45.019514 24.821866,0 44.983493,-20.171067 44.983493,-45.019514 0,-24.848446 -20.161627,-45.0195135 -44.983493,-45.0195135 z m 0,3.0318545 c 23.226908,0 42.019464,18.787331 42.019464,41.987659 0,23.200328 -18.792556,41.987659 -42.019464,41.987659 -23.226908,0 -42.0194648,-18.787331 -42.0194648,-41.987659 0,-23.200328 18.7925568,-41.987659 42.0194648,-41.987659 z" color="#000"/>
+					</svg>
+				</svg>
+			</g>
+		</g>
+	</mask>
+</svg>

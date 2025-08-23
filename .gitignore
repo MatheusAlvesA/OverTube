@@ -1,3 +1,4 @@
 .vscode
 overtube.exe
 state.json
+*.syso
