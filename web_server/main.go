@@ -2,10 +2,11 @@ package web_server
 
 import (
 	"log"
+	"overtube/save_state"
 )
 
-func CreateServer() *WebChatStreamServer {
-	server := &WebChatStreamServer{Port: 1337}
+func CreateServer(appState *save_state.AppState) *WebChatStreamServer {
+	server := &WebChatStreamServer{Port: 1337, appState: appState}
 
 	log.Println("[CreateServer] Starting Web Server")
 	if !server.Start() {

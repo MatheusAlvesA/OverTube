@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"reflect"
 )
 
 func Save(data *AppState) bool {
@@ -42,9 +43,10 @@ func Read() *AppState {
 	}
 
 	readedState := &AppState{
-		YoutubeChannel: getDataOrDefault(readedData, "YoutubeChannel", "").(string),
-		TwitchChannel:  getDataOrDefault(readedData, "TwitchChannel", "").(string),
-		ChatStyleId:    uint(getDataOrDefault(readedData, "ChatStyleId", float64(1)).(float64)),
+		YoutubeChannel:      getDataOrDefault(readedData, "YoutubeChannel", "").(string),
+		TwitchChannel:       getDataOrDefault(readedData, "TwitchChannel", "").(string),
+		ChatStyleId:         uint(getDataOrDefault(readedData, "ChatStyleId", float64(1)).(float64)),
+		ChatStyleCustomCSSs: getCSSCustoms(readedData),
 	}
 
 	return readedState
@@ -55,4 +57,23 @@ func getDataOrDefault(readedData map[string]any, key string, defaultValue any) a
 		return defaultValue
 	}
 	return readedData[key]
+}
+
+func getCSSCustoms(readedData map[string]any) []ChatStyleCustomCSS {
+	if readedData["ChatStyleCustomCSSs"] == nil {
+		return []ChatStyleCustomCSS{}
+	}
+	t := reflect.TypeOf(readedData["ChatStyleCustomCSSs"])
+	if t.Kind() != reflect.Slice {
+		log.Println("[save_state::Read] ChatStyleCustomCSSs is not a slice", t.Kind())
+		return []ChatStyleCustomCSS{}
+	}
+	list := make([]ChatStyleCustomCSS, 0)
+	for _, item := range readedData["ChatStyleCustomCSSs"].([]any) {
+		list = append(list, ChatStyleCustomCSS{
+			Id:  uint(item.(map[string]any)["Id"].(float64)),
+			CSS: item.(map[string]any)["CSS"].(string),
+		})
+	}
+	return list
 }

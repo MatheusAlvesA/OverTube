@@ -61,6 +61,19 @@ type UIEventSetChatStyle struct {
 
 func (e UIEventSetChatStyle) GetError() error { return nil }
 
+type SetChatStyleCustomCSS struct {
+	Id  uint
+	CSS string
+}
+
+func (e SetChatStyleCustomCSS) GetError() error { return nil }
+
+type ResetChatStyleCustomCSS struct {
+	Id uint
+}
+
+func (e ResetChatStyleCustomCSS) GetError() error { return nil }
+
 type UIState struct {
 	YoutubeChannelURLEditor    *widget.Editor
 	YouTubeChannelClickable    *widget.Clickable
@@ -79,12 +92,19 @@ type UIState struct {
 
 	ChatStyleId         uint
 	ChatStyleClickables map[uint]*widget.Clickable
+	ChatStyleCustomCSSs map[uint]*widget.Editor
+	ConfirmCSSClickable *widget.Clickable
+	RevertCSSClickable  *widget.Clickable
 
 	UIClosed bool
 }
 
 func (s *UIState) GetChatStyleClickable(id uint) *widget.Clickable {
 	return s.ChatStyleClickables[id]
+}
+
+func (s *UIState) GetChatStyleCustomCSS(id uint) *widget.Editor {
+	return s.ChatStyleCustomCSSs[id]
 }
 
 // Flow implementa um container com quebra de linha

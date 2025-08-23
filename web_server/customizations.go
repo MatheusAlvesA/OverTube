@@ -1,6 +1,9 @@
 package web_server
 
-import "log"
+import (
+	"log"
+	"overtube/save_state"
+)
 
 func GetChatStyleOptions() []ChatStyleOption {
 	return []ChatStyleOption{
@@ -44,4 +47,13 @@ func GetChatStyleFromId(id uint) *ChatStyleOption {
 		}
 	}
 	return nil
+}
+
+func GetCurrentCSSForId(id uint, appState *save_state.AppState) string {
+	for _, css := range appState.ChatStyleCustomCSSs {
+		if css.Id == id {
+			return css.CSS
+		}
+	}
+	return GetChatStyleFromId(id).CSS
 }

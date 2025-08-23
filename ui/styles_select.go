@@ -39,3 +39,76 @@ func renderCustomizeSection(theme *material.Theme, state *UIState) layout.FlexCh
 		},
 	)
 }
+
+func renderCSSInputSection(theme *material.Theme, state *UIState) layout.FlexChild {
+	return layout.Rigid(
+		func(gtx layC) layD {
+			return layout.Inset{
+				Top:    unit.Dp(16),
+				Left:   unit.Dp(16),
+				Right:  unit.Dp(16),
+				Bottom: unit.Dp(16),
+			}.Layout(gtx, func(gtx layC) layD {
+				return layout.Flex{
+					Axis:      layout.Horizontal,
+					Spacing:   layout.SpaceBetween,
+					Alignment: layout.Middle,
+				}.Layout(gtx, layout.Rigid(func(gtx layC) layD {
+					return layout.Inset{Left: unit.Dp(8)}.Layout(gtx, func(gtx layC) layD {
+						// Calcular altura para 4 linhas de texto
+						lineHeight := gtx.Sp(theme.TextSize)
+						maxHeight := lineHeight * 10
+
+						// Aplicar restrição de altura
+						gtx.Constraints.Max.Y = maxHeight
+						gtx.Constraints.Min.Y = maxHeight
+
+						editor := material.Editor(theme, state.GetChatStyleCustomCSS(state.ChatStyleId), "CSS")
+
+						return editor.Layout(gtx)
+					})
+				}))
+			})
+		},
+	)
+}
+
+func renderCSSInputConfirmBtns(theme *material.Theme, state *UIState) layout.FlexChild {
+	return layout.Rigid(
+		func(gtx layC) layD {
+			confirm := state.ConfirmCSSClickable
+			if confirm.Hovered() {
+				pointer.CursorPointer.Add(gtx.Ops)
+			}
+			confirmUI := material.Button(theme, confirm, "Confirmar")
+			confirmUI.Background = color.NRGBA{R: 33, G: 155, B: 167, A: 255}
+			confirmUI.Color = color.NRGBA{R: 255, G: 255, B: 255, A: 255}
+
+			revert := state.RevertCSSClickable
+			if revert.Hovered() {
+				pointer.CursorPointer.Add(gtx.Ops)
+			}
+			revertUI := material.Button(theme, revert, "Reverter")
+			revertUI.Background = color.NRGBA{R: 255, G: 165, B: 100, A: 255}
+			revertUI.Color = color.NRGBA{R: 255, G: 255, B: 255, A: 255}
+
+			return layout.Flex{
+				Axis:      layout.Horizontal,
+				Spacing:   layout.SpaceStart,
+				Alignment: layout.Middle,
+			}.Layout(gtx,
+				layout.Rigid(func(gtx layC) layD {
+					return layout.Inset{Right: unit.Dp(8)}.Layout(gtx, func(gtx layC) layD {
+						gtx.Constraints.Min.X = 0
+						return revertUI.Layout(gtx)
+					})
+				}),
+				layout.Rigid(func(gtx layC) layD {
+					return layout.Inset{Right: unit.Dp(8)}.Layout(gtx, func(gtx layC) layD {
+						gtx.Constraints.Min.X = 0
+						return confirmUI.Layout(gtx)
+					})
+				}))
+		},
+	)
+}

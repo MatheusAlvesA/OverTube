@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"overtube/save_state"
 	"time"
 )
 
@@ -17,10 +18,15 @@ type WebChatStreamServer struct {
 	Port              uint
 	srv               *http.Server
 	selectedChatStyle *ChatStyleOption
+	appState          *save_state.AppState
 }
 
 func (s *WebChatStreamServer) SetSelectedChatStyle(style *ChatStyleOption) {
 	s.selectedChatStyle = style
+}
+
+func (s *WebChatStreamServer) SetAppState(appState *save_state.AppState) {
+	s.appState = appState
 }
 
 func (s *WebChatStreamServer) Start() bool {
@@ -40,7 +46,7 @@ func (s *WebChatStreamServer) Start() bool {
 		if s.selectedChatStyle == nil {
 			w.Write([]byte(""))
 		} else {
-			w.Write([]byte(s.selectedChatStyle.CSS))
+			w.Write([]byte(GetCurrentCSSForId(s.selectedChatStyle.Id, s.appState)))
 		}
 	}))
 	go s.srv.ListenAndServe()

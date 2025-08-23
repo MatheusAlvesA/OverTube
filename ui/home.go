@@ -53,11 +53,17 @@ func initialState() *UIState {
 	state.TwitchChannelClickable = &widget.Clickable{}
 
 	state.CopyLinkToChatClickable = &widget.Clickable{}
+	state.ConfirmCSSClickable = &widget.Clickable{}
+	state.RevertCSSClickable = &widget.Clickable{}
 
 	state.ChatStyleId = 1
 	state.ChatStyleClickables = make(map[uint]*widget.Clickable)
+	state.ChatStyleCustomCSSs = make(map[uint]*widget.Editor)
 	for _, style := range web_server.GetChatStyleOptions() {
 		state.ChatStyleClickables[style.Id] = &widget.Clickable{}
+		editor := &widget.Editor{}
+		editor.SingleLine = false // Permitir múltiplas linhas para CSS
+		state.ChatStyleCustomCSSs[style.Id] = editor
 	}
 
 	return state
@@ -74,6 +80,12 @@ func readAppState(state *UIState, appState save_state.AppState) {
 	}
 	if appState.ChatStyleId > 0 {
 		state.ChatStyleId = appState.ChatStyleId
+	}
+	for _, css := range web_server.GetChatStyleOptions() {
+		editor := &widget.Editor{}
+		editor.SingleLine = false // Permitir múltiplas linhas para CSS
+		state.ChatStyleCustomCSSs[css.Id] = editor
+		state.ChatStyleCustomCSSs[css.Id].SetText(web_server.GetCurrentCSSForId(css.Id, &appState))
 	}
 }
 
@@ -107,6 +119,8 @@ func run(window *app.Window, uiEvents chan<- UIEvent, uiCommands <-chan UIComman
 				renderBtnCopyLinkToChat(theme, state),
 				renderCustomSectionLineSeparator(theme),
 				renderCustomizeSection(theme, state),
+				renderCSSInputSection(theme, state),
+				renderCSSInputConfirmBtns(theme, state),
 			)
 
 			e.Frame(gtx.Ops)
@@ -207,6 +221,20 @@ func emitEvents(gtx layC, state *UIState, uiEvents chan<- UIEvent) {
 			time.Sleep(time.Second * 2)
 			state.CopyLinkToChatCopied = false
 		}()
+	}
+
+	if state.ConfirmCSSClickable.Clicked(gtx) {
+		uiEvents <- SetChatStyleCustomCSS{
+			Id:  state.ChatStyleId,
+			CSS: state.GetChatStyleCustomCSS(state.ChatStyleId).Text(),
+		}
+	}
+
+	if state.RevertCSSClickable.Clicked(gtx) {
+		uiEvents <- ResetChatStyleCustomCSS{
+			Id: state.ChatStyleId,
+		}
+		state.ChatStyleCustomCSSs[state.ChatStyleId].SetText(web_server.GetChatStyleFromId(state.ChatStyleId).CSS)
 	}
 
 	if state.YouTubeChannelClickable.Hovered() || state.TwitchChannelClickable.Hovered() || state.CopyLinkToChatClickable.Hovered() {
@@ -504,7 +532,7 @@ func renderBtnCopyLinkToChat(
 	btnUI := material.Button(theme, state.CopyLinkToChatClickable, "Copiar link para o chat")
 
 	if state.CopyLinkToChatCopied {
-		btnUI.Text = "Copied!"
+		btnUI.Text = "Copiado!"
 	}
 
 	return layout.Rigid(

@@ -10,10 +10,10 @@ import (
 	"reflect"
 )
 
-var wsServer = ws_server.CreateServer()
-var webServer = web_server.CreateServer()
-var uiCommandsChan = make(chan ui.UICommand)
 var appState = save_state.Read()
+var wsServer = ws_server.CreateServer()
+var webServer = web_server.CreateServer(appState)
+var uiCommandsChan = make(chan ui.UICommand)
 
 func main() {
 	uiEventChan := make(chan ui.UIEvent)
@@ -106,6 +106,14 @@ func orchestrateEvents(uiEventChan chan ui.UIEvent) {
 		case ui.UIEventSetChatStyle:
 			webServer.SetSelectedChatStyle(web_server.GetChatStyleFromId(v.Id))
 			appState.ChatStyleId = v.Id
+			save_state.Save(appState)
+			wsServer.RefreshClients()
+		case ui.SetChatStyleCustomCSS:
+			appState.SetChatStyleCustomCSS(v.Id, v.CSS)
+			save_state.Save(appState)
+			wsServer.RefreshClients()
+		case ui.ResetChatStyleCustomCSS:
+			appState.ResetChatStyleCustomCSS(v.Id)
 			save_state.Save(appState)
 			wsServer.RefreshClients()
 		case ui.UIEventExit:
