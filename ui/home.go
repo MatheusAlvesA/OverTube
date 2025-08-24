@@ -12,6 +12,7 @@ import (
 	"overtube/save_state"
 	"overtube/web_server"
 	"overtube/ws_server"
+	"regexp"
 	"strings"
 	"time"
 
@@ -191,7 +192,7 @@ func handleCommand(w *app.Window, state *UIState, cmd UICommand) {
 }
 
 func emitEvents(gtx layC, state *UIState, uiEvents chan<- UIEvent) {
-	if state.YouTubeChannelClickable.Clicked(gtx) {
+	if state.YouTubeChannelClickable.Clicked(gtx) && validateYoutubeChannelURLEditor(state) {
 		if state.YoutubeChannelSet == "" {
 			state.YoutubeChannelSet = state.YoutubeChannelURLEditor.Text()
 			uiEvents <- UIEventSetYoutubeChannel{
@@ -204,7 +205,7 @@ func emitEvents(gtx layC, state *UIState, uiEvents chan<- UIEvent) {
 		}
 	}
 
-	if state.TwitchChannelClickable.Clicked(gtx) {
+	if state.TwitchChannelClickable.Clicked(gtx) && validateTwichChannelURLEditor(state) {
 		if state.TwitchChannelSet == "" {
 			state.TwitchChannelSet = state.TwitchChannelURLEditor.Text()
 			uiEvents <- UIEventSetTwitchChannel{
@@ -618,4 +619,22 @@ func renderCustomSectionLineSeparator(theme *material.Theme) layout.FlexChild {
 			)
 		},
 	)
+}
+
+func validateTwichChannelURLEditor(state *UIState) bool {
+	re := regexp.MustCompile(`[^a-zA-Z0-9_]`)
+	currentText := state.TwitchChannelURLEditor.Text()
+	cleanedText := re.ReplaceAllString(currentText, "")
+	state.TwitchChannelURLEditor.SetText(cleanedText)
+
+	return cleanedText != ""
+}
+
+func validateYoutubeChannelURLEditor(state *UIState) bool {
+	re := regexp.MustCompile(`[^a-zA-Z0-9_-]`)
+	currentText := state.YoutubeChannelURLEditor.Text()
+	cleanedText := re.ReplaceAllString(currentText, "")
+	state.YoutubeChannelURLEditor.SetText(cleanedText)
+
+	return cleanedText != ""
 }
