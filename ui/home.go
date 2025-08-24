@@ -1,13 +1,13 @@
 package ui
 
 import (
+	"embed"
 	"image"
 	"image/color"
 	"image/draw"
 	"image/png"
 	"io"
 	"log"
-	"os"
 	"overtube/chat_stream"
 	"overtube/save_state"
 	"overtube/web_server"
@@ -27,6 +27,9 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 )
+
+//go:embed platform_icons/*
+var platformIcons embed.FS
 
 func CreateHomeWindow(uiEvents chan<- UIEvent, uiCommands <-chan UICommand, appState *save_state.AppState) {
 	go func() {
@@ -307,8 +310,9 @@ func renderYoutubeChannelInput(
 						func(gtx layC) layD {
 							return layout.Inset{Right: unit.Dp(10)}.Layout(gtx, func(gtx layC) layD {
 								// Image of youtube logo
-								file, err := os.Open("web_server/www/platform_icons/yt.png")
+								file, err := platformIcons.Open("platform_icons/yt.png")
 								if err != nil {
+									log.Println("Error loading youtube logo:", err)
 									// Fallback: create a red square if image loading fails
 									img := image.NewRGBA(image.Rect(0, 0, 25, 25))
 									draw.Draw(img, img.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
@@ -318,6 +322,7 @@ func renderYoutubeChannelInput(
 
 								img, err := png.Decode(file)
 								if err != nil {
+									log.Println("Error decoding youtube logo:", err)
 									// Fallback: create a red square if image decoding fails
 									fallbackImg := image.NewRGBA(image.Rect(0, 0, 25, 25))
 									draw.Draw(fallbackImg, fallbackImg.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
@@ -435,9 +440,10 @@ func renderTwichChannelInput(
 					layout.Rigid(
 						func(gtx layC) layD {
 							return layout.Inset{Right: unit.Dp(10)}.Layout(gtx, func(gtx layC) layD {
-								// Image of youtube logo
-								file, err := os.Open("web_server/www/platform_icons/tw.png")
+								// Image of twitch logo
+								file, err := platformIcons.Open("platform_icons/tw.png")
 								if err != nil {
+									log.Println("Error loading twitch logo:", err)
 									// Fallback: create a red square if image loading fails
 									img := image.NewRGBA(image.Rect(0, 0, 25, 25))
 									draw.Draw(img, img.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
@@ -447,6 +453,7 @@ func renderTwichChannelInput(
 
 								img, err := png.Decode(file)
 								if err != nil {
+									log.Println("Error decoding twitch logo:", err)
 									// Fallback: create a red square if image decoding fails
 									fallbackImg := image.NewRGBA(image.Rect(0, 0, 25, 25))
 									draw.Draw(fallbackImg, fallbackImg.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)

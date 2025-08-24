@@ -25,9 +25,10 @@ func Save(data *AppState) bool {
 
 func Read() *AppState {
 	defaultState := &AppState{
-		YoutubeChannel: "",
-		TwitchChannel:  "",
-		ChatStyleId:    1,
+		YoutubeChannel:      "",
+		TwitchChannel:       "",
+		ChatStyleId:         1,
+		ChatStyleCustomCSSs: []ChatStyleCustomCSS{},
 	}
 
 	dataJson, err := os.ReadFile("state.json")
