@@ -90,6 +90,8 @@ type UIState struct {
 	CopyLinkToChatClickable *widget.Clickable
 	CopyLinkToChatCopied    bool
 
+	VersionClickable *widget.Clickable
+
 	ChatStyleId         uint
 	ChatStyleClickables map[uint]*widget.Clickable
 	ChatStyleCustomCSSs map[uint]*widget.Editor

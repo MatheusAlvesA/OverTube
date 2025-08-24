@@ -27,6 +27,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
+	"golang.org/x/sys/windows"
 )
 
 //go:embed platform_icons/*
@@ -60,6 +61,7 @@ func initialState() *UIState {
 	state.TwitchChannelClickable = &widget.Clickable{}
 
 	state.CopyLinkToChatClickable = &widget.Clickable{}
+	state.VersionClickable = &widget.Clickable{}
 	state.ConfirmCSSClickable = &widget.Clickable{}
 	state.RevertCSSClickable = &widget.Clickable{}
 
@@ -117,7 +119,7 @@ func run(window *app.Window, uiEvents chan<- UIEvent, uiCommands <-chan UIComman
 			state.MainList.Layout(gtx, 8, func(gtx layC, index int) layD {
 				switch index {
 				case 0:
-					return renderTitle(gtx, theme)
+					return renderTitle(gtx, theme, state)
 				case 1:
 					return renderYoutubeChannelInput(gtx, theme, state)
 				case 2:
@@ -251,7 +253,14 @@ func emitEvents(gtx layC, state *UIState, uiEvents chan<- UIEvent) {
 		state.ChatStyleCustomCSSs[state.ChatStyleId].SetText(web_server.GetChatStyleFromId(state.ChatStyleId).CSS)
 	}
 
-	if state.YouTubeChannelClickable.Hovered() || state.TwitchChannelClickable.Hovered() || state.CopyLinkToChatClickable.Hovered() {
+	if state.VersionClickable.Clicked(gtx) {
+		windows.ShellExecute(0, nil, windows.StringToUTF16Ptr("https://github.com/MatheusAlvesA/OverTube"), nil, nil, windows.SW_SHOWNORMAL)
+	}
+
+	if state.YouTubeChannelClickable.Hovered() ||
+		state.TwitchChannelClickable.Hovered() ||
+		state.CopyLinkToChatClickable.Hovered() ||
+		state.VersionClickable.Hovered() {
 		pointer.CursorPointer.Add(gtx.Ops)
 	}
 
@@ -268,15 +277,38 @@ func emitEvents(gtx layC, state *UIState, uiEvents chan<- UIEvent) {
 	}
 }
 
-func renderTitle(gtx layC, theme *material.Theme) layD {
-	title := material.H3(theme, "OverTube")
+func renderTitle(gtx layC, theme *material.Theme, state *UIState) layD {
+	return layout.Inset{
+		Top:    unit.Dp(0),
+		Left:   unit.Dp(16),
+		Right:  unit.Dp(16),
+		Bottom: unit.Dp(0),
+	}.Layout(gtx, func(gtx layC) layD {
+		title := material.H3(theme, "OverTube")
+		maroon := color.NRGBA{R: 127, G: 0, B: 0, A: 255}
+		title.Color = maroon
+		title.Alignment = text.Start
 
-	maroon := color.NRGBA{R: 127, G: 0, B: 0, A: 255}
-	title.Color = maroon
+		labelVersion := material.Label(theme, unit.Sp(12), "Versão 0.8.0")
+		if state.VersionClickable.Hovered() {
+			labelVersion.Color = color.NRGBA{R: 0, G: 0, B: 255, A: 255}
+		} else {
+			labelVersion.Color = color.NRGBA{R: 127, G: 127, B: 127, A: 255}
+		}
+		labelVersion.Alignment = text.End
 
-	title.Alignment = text.Start
-
-	return title.Layout(gtx)
+		return layout.Flex{
+			Axis:      layout.Horizontal,
+			Spacing:   layout.SpaceBetween,
+			Alignment: layout.Middle,
+		}.Layout(gtx, layout.Rigid(func(gtx layC) layD {
+			return title.Layout(gtx)
+		}), layout.Rigid(func(gtx layC) layD {
+			return state.VersionClickable.Layout(gtx, func(gtx layC) layD {
+				return labelVersion.Layout(gtx)
+			})
+		}))
+	})
 }
 
 func renderYoutubeChannelInput(
