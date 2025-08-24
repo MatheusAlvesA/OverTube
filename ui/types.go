@@ -96,6 +96,8 @@ type UIState struct {
 	ConfirmCSSClickable *widget.Clickable
 	RevertCSSClickable  *widget.Clickable
 
+	MainList *widget.List
+
 	UIClosed bool
 }
 

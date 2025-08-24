@@ -46,6 +46,9 @@ func CreateHomeWindow(uiEvents chan<- UIEvent, uiCommands <-chan UICommand, appS
 
 func initialState() *UIState {
 	state := &UIState{}
+	state.MainList = &widget.List{}
+	state.MainList.Axis = layout.Vertical
+
 	state.YoutubeChannelURLEditor = &widget.Editor{}
 	state.YoutubeChannelURLEditor.SingleLine = true
 	state.YoutubeChannelURLEditor.MaxLen = 60
@@ -111,21 +114,28 @@ func run(window *app.Window, uiEvents chan<- UIEvent, uiCommands <-chan UIComman
 			emitEvents(gtx, state, uiEvents)
 
 			// Main component layout
-			layout.Flex{
-				Axis:      layout.Vertical,
-				Spacing:   layout.SpaceEnd,
-				Alignment: layout.Start,
-			}.Layout(
-				gtx,
-				renderTitle(theme),
-				renderYoutubeChannelInput(theme, state),
-				renderTwichChannelInput(theme, state),
-				renderBtnCopyLinkToChat(theme, state),
-				renderCustomSectionLineSeparator(theme),
-				renderCustomizeSection(theme, state),
-				renderCSSInputSection(theme, state),
-				renderCSSInputConfirmBtns(theme, state),
-			)
+			state.MainList.Layout(gtx, 8, func(gtx layC, index int) layD {
+				switch index {
+				case 0:
+					return renderTitle(gtx, theme)
+				case 1:
+					return renderYoutubeChannelInput(gtx, theme, state)
+				case 2:
+					return renderTwichChannelInput(gtx, theme, state)
+				case 3:
+					return renderBtnCopyLinkToChat(gtx, theme, state)
+				case 4:
+					return renderCustomSectionLineSeparator(gtx, theme)
+				case 5:
+					return renderCustomizeSection(gtx, theme, state)
+				case 6:
+					return renderCSSInputSection(gtx, theme, state)
+				case 7:
+					return renderCSSInputConfirmBtns(gtx, theme, state)
+				default:
+					return layout.Dimensions{}
+				}
+			})
 
 			e.Frame(gtx.Ops)
 		}
@@ -258,7 +268,7 @@ func emitEvents(gtx layC, state *UIState, uiEvents chan<- UIEvent) {
 	}
 }
 
-func renderTitle(theme *material.Theme) layout.FlexChild {
+func renderTitle(gtx layC, theme *material.Theme) layD {
 	title := material.H3(theme, "OverTube")
 
 	maroon := color.NRGBA{R: 127, G: 0, B: 0, A: 255}
@@ -266,15 +276,14 @@ func renderTitle(theme *material.Theme) layout.FlexChild {
 
 	title.Alignment = text.Start
 
-	return layout.Rigid(func(gtx layC) layD {
-		return title.Layout(gtx)
-	})
+	return title.Layout(gtx)
 }
 
 func renderYoutubeChannelInput(
+	gtx layC,
 	theme *material.Theme,
 	state *UIState,
-) layout.FlexChild {
+) layD {
 	editor := state.YoutubeChannelURLEditor
 	editorUI := material.Editor(theme, editor, "YouTube @Channel")
 	editorUI.LineHeight = 1.5
@@ -298,114 +307,111 @@ func renderYoutubeChannelInput(
 		Bottom: unit.Dp(16),
 	}
 
-	return layout.Rigid(
-		func(gtx layC) layD {
-			return margin.Layout(gtx, func(gtx layC) layD {
-				return layout.Flex{
-					Axis:      layout.Horizontal,
-					Spacing:   layout.SpaceBetween,
-					Alignment: layout.Middle,
-				}.Layout(
-					gtx,
-					layout.Rigid(
-						func(gtx layC) layD {
-							return layout.Inset{Right: unit.Dp(10)}.Layout(gtx, func(gtx layC) layD {
-								// Image of youtube logo
-								file, err := platformIcons.Open("platform_icons/yt.png")
-								if err != nil {
-									log.Println("Error loading youtube logo:", err)
-									// Fallback: create a red square if image loading fails
-									img := image.NewRGBA(image.Rect(0, 0, 25, 25))
-									draw.Draw(img, img.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
-									return widget.Image{Src: paint.NewImageOp(img)}.Layout(gtx)
+	return margin.Layout(gtx, func(gtx layC) layD {
+		return layout.Flex{
+			Axis:      layout.Horizontal,
+			Spacing:   layout.SpaceBetween,
+			Alignment: layout.Middle,
+		}.Layout(
+			gtx,
+			layout.Rigid(
+				func(gtx layC) layD {
+					return layout.Inset{Right: unit.Dp(10)}.Layout(gtx, func(gtx layC) layD {
+						// Image of youtube logo
+						file, err := platformIcons.Open("platform_icons/yt.png")
+						if err != nil {
+							log.Println("Error loading youtube logo:", err)
+							// Fallback: create a red square if image loading fails
+							img := image.NewRGBA(image.Rect(0, 0, 25, 25))
+							draw.Draw(img, img.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
+							return widget.Image{Src: paint.NewImageOp(img)}.Layout(gtx)
+						}
+						defer file.Close()
+
+						img, err := png.Decode(file)
+						if err != nil {
+							log.Println("Error decoding youtube logo:", err)
+							// Fallback: create a red square if image decoding fails
+							fallbackImg := image.NewRGBA(image.Rect(0, 0, 25, 25))
+							draw.Draw(fallbackImg, fallbackImg.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
+							return widget.Image{Src: paint.NewImageOp(fallbackImg)}.Layout(gtx)
+						}
+
+						return widget.Image{
+							Src:   paint.NewImageOp(img),
+							Scale: 0.6,
+						}.Layout(gtx)
+					})
+				},
+			),
+			layout.Flexed(
+				1,
+				func(gtx layC) layD {
+					return widget.Border{
+						Color:        color.NRGBA{R: 200, G: 200, B: 200, A: 255},
+						Width:        unit.Dp(1),
+						CornerRadius: unit.Dp(4),
+					}.Layout(gtx, func(gtx layC) layD {
+						return layout.UniformInset(6).Layout(
+							gtx,
+							func(gtx layC) layD {
+								if state.YoutubeChannelSet != "" {
+									paint.FillShape(gtx.Ops,
+										color.NRGBA{R: 220, G: 220, B: 220, A: 255},
+										clip.Rect{
+											Max: image.Point{
+												X: gtx.Constraints.Max.X,
+												Y: 20,
+											},
+										}.Op(),
+									)
+									return material.Body1(theme, state.YoutubeChannelSet).Layout(gtx)
 								}
-								defer file.Close()
+								return editorUI.Layout(gtx)
+							},
+						)
+					})
+				},
+			),
+			layout.Rigid(
+				func(gtx layC) layD {
+					circle := clip.Ellipse{
+						Min: image.Pt(10, 10),
+						Max: image.Pt(20, 20),
+					}.Op(gtx.Ops)
 
-								img, err := png.Decode(file)
-								if err != nil {
-									log.Println("Error decoding youtube logo:", err)
-									// Fallback: create a red square if image decoding fails
-									fallbackImg := image.NewRGBA(image.Rect(0, 0, 25, 25))
-									draw.Draw(fallbackImg, fallbackImg.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
-									return widget.Image{Src: paint.NewImageOp(fallbackImg)}.Layout(gtx)
-								}
+					c := color.NRGBA{R: 92, G: 184, B: 92, A: 255}
+					if state.YoutubeConnStatus == ws_server.ChannelConnectionStarting {
+						c = color.NRGBA{R: 255, G: 204, B: 0, A: 255}
+					}
+					if state.YoutubeConnStatus == ws_server.ChannelConnectionStopped {
+						c = color.NRGBA{R: 204, G: 51, B: 0, A: 255}
+					}
 
-								return widget.Image{
-									Src:   paint.NewImageOp(img),
-									Scale: 0.6,
-								}.Layout(gtx)
-							})
-						},
-					),
-					layout.Flexed(
-						1,
+					paint.FillShape(gtx.Ops, c, circle)
+
+					return layout.Dimensions{Size: image.Pt(25, 25)}
+				},
+			),
+			layout.Rigid(
+				func(gtx layC) layD {
+					return layout.Inset{Left: unit.Dp(8)}.Layout(
+						gtx,
 						func(gtx layC) layD {
-							return widget.Border{
-								Color:        color.NRGBA{R: 200, G: 200, B: 200, A: 255},
-								Width:        unit.Dp(1),
-								CornerRadius: unit.Dp(4),
-							}.Layout(gtx, func(gtx layC) layD {
-								return layout.UniformInset(6).Layout(
-									gtx,
-									func(gtx layC) layD {
-										if state.YoutubeChannelSet != "" {
-											paint.FillShape(gtx.Ops,
-												color.NRGBA{R: 220, G: 220, B: 220, A: 255},
-												clip.Rect{
-													Max: image.Point{
-														X: gtx.Constraints.Max.X,
-														Y: 20,
-													},
-												}.Op(),
-											)
-											return material.Body1(theme, state.YoutubeChannelSet).Layout(gtx)
-										}
-										return editorUI.Layout(gtx)
-									},
-								)
-							})
+							return submitUI.Layout(gtx)
 						},
-					),
-					layout.Rigid(
-						func(gtx layC) layD {
-							circle := clip.Ellipse{
-								Min: image.Pt(10, 10),
-								Max: image.Pt(20, 20),
-							}.Op(gtx.Ops)
-
-							c := color.NRGBA{R: 92, G: 184, B: 92, A: 255}
-							if state.YoutubeConnStatus == ws_server.ChannelConnectionStarting {
-								c = color.NRGBA{R: 255, G: 204, B: 0, A: 255}
-							}
-							if state.YoutubeConnStatus == ws_server.ChannelConnectionStopped {
-								c = color.NRGBA{R: 204, G: 51, B: 0, A: 255}
-							}
-
-							paint.FillShape(gtx.Ops, c, circle)
-
-							return layout.Dimensions{Size: image.Pt(25, 25)}
-						},
-					),
-					layout.Rigid(
-						func(gtx layC) layD {
-							return layout.Inset{Left: unit.Dp(8)}.Layout(
-								gtx,
-								func(gtx layC) layD {
-									return submitUI.Layout(gtx)
-								},
-							)
-						},
-					),
-				)
-			})
-		},
-	)
+					)
+				},
+			),
+		)
+	})
 }
 
 func renderTwichChannelInput(
+	gtx layC,
 	theme *material.Theme,
 	state *UIState,
-) layout.FlexChild {
+) layD {
 	editor := state.TwitchChannelURLEditor
 	editorUI := material.Editor(theme, editor, "Twitch username")
 	editorUI.LineHeight = 1.5
@@ -429,195 +435,184 @@ func renderTwichChannelInput(
 		Bottom: unit.Dp(16),
 	}
 
-	return layout.Rigid(
-		func(gtx layC) layD {
-			return margin.Layout(gtx, func(gtx layC) layD {
-				return layout.Flex{
-					Axis:      layout.Horizontal,
-					Spacing:   layout.SpaceBetween,
-					Alignment: layout.Middle,
-				}.Layout(
-					gtx,
-					layout.Rigid(
-						func(gtx layC) layD {
-							return layout.Inset{Right: unit.Dp(10)}.Layout(gtx, func(gtx layC) layD {
-								// Image of twitch logo
-								file, err := platformIcons.Open("platform_icons/tw.png")
-								if err != nil {
-									log.Println("Error loading twitch logo:", err)
-									// Fallback: create a red square if image loading fails
-									img := image.NewRGBA(image.Rect(0, 0, 25, 25))
-									draw.Draw(img, img.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
-									return widget.Image{Src: paint.NewImageOp(img)}.Layout(gtx)
+	return margin.Layout(gtx, func(gtx layC) layD {
+		return layout.Flex{
+			Axis:      layout.Horizontal,
+			Spacing:   layout.SpaceBetween,
+			Alignment: layout.Middle,
+		}.Layout(
+			gtx,
+			layout.Rigid(
+				func(gtx layC) layD {
+					return layout.Inset{Right: unit.Dp(10)}.Layout(gtx, func(gtx layC) layD {
+						// Image of twitch logo
+						file, err := platformIcons.Open("platform_icons/tw.png")
+						if err != nil {
+							log.Println("Error loading twitch logo:", err)
+							// Fallback: create a red square if image loading fails
+							img := image.NewRGBA(image.Rect(0, 0, 25, 25))
+							draw.Draw(img, img.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
+							return widget.Image{Src: paint.NewImageOp(img)}.Layout(gtx)
+						}
+						defer file.Close()
+
+						img, err := png.Decode(file)
+						if err != nil {
+							log.Println("Error decoding twitch logo:", err)
+							// Fallback: create a red square if image decoding fails
+							fallbackImg := image.NewRGBA(image.Rect(0, 0, 25, 25))
+							draw.Draw(fallbackImg, fallbackImg.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
+							return widget.Image{Src: paint.NewImageOp(fallbackImg)}.Layout(gtx)
+						}
+
+						return widget.Image{
+							Src:   paint.NewImageOp(img),
+							Scale: 0.45,
+						}.Layout(gtx)
+					})
+				},
+			),
+			layout.Flexed(
+				1,
+				func(gtx layC) layD {
+					return widget.Border{
+						Color:        color.NRGBA{R: 200, G: 200, B: 200, A: 255},
+						Width:        unit.Dp(1),
+						CornerRadius: unit.Dp(4),
+					}.Layout(gtx, func(gtx layC) layD {
+						return layout.UniformInset(6).Layout(
+							gtx,
+							func(gtx layC) layD {
+								if state.TwitchChannelSet != "" {
+									paint.FillShape(gtx.Ops,
+										color.NRGBA{R: 220, G: 220, B: 220, A: 255},
+										clip.Rect{
+											Max: image.Point{
+												X: gtx.Constraints.Max.X,
+												Y: 20,
+											},
+										}.Op(),
+									)
+									return material.Body1(theme, state.TwitchChannelSet).Layout(gtx)
 								}
-								defer file.Close()
+								return editorUI.Layout(gtx)
+							},
+						)
+					})
+				},
+			),
+			layout.Rigid(
+				func(gtx layC) layD {
+					circle := clip.Ellipse{
+						Min: image.Pt(10, 10),
+						Max: image.Pt(20, 20),
+					}.Op(gtx.Ops)
 
-								img, err := png.Decode(file)
-								if err != nil {
-									log.Println("Error decoding twitch logo:", err)
-									// Fallback: create a red square if image decoding fails
-									fallbackImg := image.NewRGBA(image.Rect(0, 0, 25, 25))
-									draw.Draw(fallbackImg, fallbackImg.Bounds(), &image.Uniform{C: color.NRGBA{R: 255, G: 0, B: 0, A: 255}}, image.Point{}, draw.Src)
-									return widget.Image{Src: paint.NewImageOp(fallbackImg)}.Layout(gtx)
-								}
+					c := color.NRGBA{R: 92, G: 184, B: 92, A: 255}
+					if state.TwitchConnStatus == ws_server.ChannelConnectionStarting {
+						c = color.NRGBA{R: 255, G: 204, B: 0, A: 255}
+					}
+					if state.TwitchConnStatus == ws_server.ChannelConnectionStopped {
+						c = color.NRGBA{R: 204, G: 51, B: 0, A: 255}
+					}
 
-								return widget.Image{
-									Src:   paint.NewImageOp(img),
-									Scale: 0.45,
-								}.Layout(gtx)
-							})
-						},
-					),
-					layout.Flexed(
-						1,
+					paint.FillShape(gtx.Ops, c, circle)
+
+					return layout.Dimensions{Size: image.Pt(25, 25)}
+				},
+			),
+			layout.Rigid(
+				func(gtx layC) layD {
+					return layout.Inset{Left: unit.Dp(8)}.Layout(
+						gtx,
 						func(gtx layC) layD {
-							return widget.Border{
-								Color:        color.NRGBA{R: 200, G: 200, B: 200, A: 255},
-								Width:        unit.Dp(1),
-								CornerRadius: unit.Dp(4),
-							}.Layout(gtx, func(gtx layC) layD {
-								return layout.UniformInset(6).Layout(
-									gtx,
-									func(gtx layC) layD {
-										if state.TwitchChannelSet != "" {
-											paint.FillShape(gtx.Ops,
-												color.NRGBA{R: 220, G: 220, B: 220, A: 255},
-												clip.Rect{
-													Max: image.Point{
-														X: gtx.Constraints.Max.X,
-														Y: 20,
-													},
-												}.Op(),
-											)
-											return material.Body1(theme, state.TwitchChannelSet).Layout(gtx)
-										}
-										return editorUI.Layout(gtx)
-									},
-								)
-							})
+							return submitUI.Layout(gtx)
 						},
-					),
-					layout.Rigid(
-						func(gtx layC) layD {
-							circle := clip.Ellipse{
-								Min: image.Pt(10, 10),
-								Max: image.Pt(20, 20),
-							}.Op(gtx.Ops)
-
-							c := color.NRGBA{R: 92, G: 184, B: 92, A: 255}
-							if state.TwitchConnStatus == ws_server.ChannelConnectionStarting {
-								c = color.NRGBA{R: 255, G: 204, B: 0, A: 255}
-							}
-							if state.TwitchConnStatus == ws_server.ChannelConnectionStopped {
-								c = color.NRGBA{R: 204, G: 51, B: 0, A: 255}
-							}
-
-							paint.FillShape(gtx.Ops, c, circle)
-
-							return layout.Dimensions{Size: image.Pt(25, 25)}
-						},
-					),
-					layout.Rigid(
-						func(gtx layC) layD {
-							return layout.Inset{Left: unit.Dp(8)}.Layout(
-								gtx,
-								func(gtx layC) layD {
-									return submitUI.Layout(gtx)
-								},
-							)
-						},
-					),
-				)
-			})
-		},
-	)
+					)
+				},
+			),
+		)
+	})
 }
 
 func renderBtnCopyLinkToChat(
+	gtx layC,
 	theme *material.Theme,
 	state *UIState,
-) layout.FlexChild {
+) layD {
 	btnUI := material.Button(theme, state.CopyLinkToChatClickable, "Copiar link para o chat")
 
 	if state.CopyLinkToChatCopied {
 		btnUI.Text = "Copiado!"
 	}
 
-	return layout.Rigid(
-		func(gtx layC) layD {
+	return layout.Inset{
+		Top:    unit.Dp(16),
+		Left:   unit.Dp(16),
+		Right:  unit.Dp(16),
+		Bottom: unit.Dp(16),
+	}.Layout(gtx, func(gtx layC) layD {
+		return layout.Flex{
+			Axis:      layout.Horizontal,
+			Spacing:   layout.SpaceBetween,
+			Alignment: layout.Middle,
+		}.Layout(
+			gtx,
+			layout.Rigid(
+				func(gtx layC) layD {
+					return layout.Inset{Left: unit.Dp(8)}.Layout(
+						gtx,
+						func(gtx layC) layD {
+							// Define largura fixa para o botão
+							gtx.Constraints.Min.X = gtx.Dp(unit.Dp(200))
+							gtx.Constraints.Max.X = gtx.Dp(unit.Dp(200))
+							return btnUI.Layout(gtx)
+						},
+					)
+				},
+			),
+		)
+	})
+}
+
+func renderCustomSectionLineSeparator(gtx layC, theme *material.Theme) layD {
+	title := material.Label(theme, unit.Sp(16), "Customização")
+	title.Color = color.NRGBA{R: 127, G: 127, B: 127, A: 255}
+
+	return layout.Flex{
+		Axis:      layout.Vertical,
+		Spacing:   layout.SpaceStart,
+		Alignment: layout.Start,
+	}.Layout(gtx,
+		layout.Rigid(func(gtx layC) layD {
 			return layout.Inset{
-				Top:    unit.Dp(16),
+				Top:    unit.Dp(0),
+				Left:   unit.Dp(16),
+				Right:  unit.Dp(0),
+				Bottom: unit.Dp(0),
+			}.Layout(gtx, func(gtx layC) layD {
+				return title.Layout(gtx)
+			})
+		}),
+		layout.Rigid(func(gtx layC) layD {
+			return layout.Inset{
+				Top:    unit.Dp(2),
 				Left:   unit.Dp(16),
 				Right:  unit.Dp(16),
 				Bottom: unit.Dp(16),
 			}.Layout(gtx, func(gtx layC) layD {
-				return layout.Flex{
-					Axis:      layout.Horizontal,
-					Spacing:   layout.SpaceBetween,
-					Alignment: layout.Middle,
-				}.Layout(
-					gtx,
-					layout.Rigid(
-						func(gtx layC) layD {
-							return layout.Inset{Left: unit.Dp(8)}.Layout(
-								gtx,
-								func(gtx layC) layD {
-									// Define largura fixa para o botão
-									gtx.Constraints.Min.X = gtx.Dp(unit.Dp(200))
-									gtx.Constraints.Max.X = gtx.Dp(unit.Dp(200))
-									return btnUI.Layout(gtx)
-								},
-							)
+				paint.FillShape(gtx.Ops,
+					color.NRGBA{R: 220, G: 220, B: 220, A: 255},
+					clip.Rect{
+						Max: image.Point{
+							X: gtx.Constraints.Max.X,
+							Y: 2,
 						},
-					),
+					}.Op(),
 				)
+				return layout.Dimensions{Size: image.Pt(gtx.Constraints.Max.X, 2)}
 			})
-		},
-	)
-}
-
-func renderCustomSectionLineSeparator(theme *material.Theme) layout.FlexChild {
-	return layout.Rigid(
-		func(gtx layC) layD {
-			title := material.Label(theme, unit.Sp(16), "Customização")
-			title.Color = color.NRGBA{R: 127, G: 127, B: 127, A: 255}
-
-			return layout.Flex{
-				Axis:      layout.Vertical,
-				Spacing:   layout.SpaceStart,
-				Alignment: layout.Start,
-			}.Layout(gtx,
-				layout.Rigid(func(gtx layC) layD {
-					return layout.Inset{
-						Top:    unit.Dp(0),
-						Left:   unit.Dp(16),
-						Right:  unit.Dp(0),
-						Bottom: unit.Dp(0),
-					}.Layout(gtx, func(gtx layC) layD {
-						return title.Layout(gtx)
-					})
-				}),
-				layout.Rigid(func(gtx layC) layD {
-					return layout.Inset{
-						Top:    unit.Dp(2),
-						Left:   unit.Dp(16),
-						Right:  unit.Dp(16),
-						Bottom: unit.Dp(16),
-					}.Layout(gtx, func(gtx layC) layD {
-						paint.FillShape(gtx.Ops,
-							color.NRGBA{R: 220, G: 220, B: 220, A: 255},
-							clip.Rect{
-								Max: image.Point{
-									X: gtx.Constraints.Max.X,
-									Y: 2,
-								},
-							}.Op(),
-						)
-						return layout.Dimensions{Size: image.Pt(gtx.Constraints.Max.X, 2)}
-					})
-				}),
-			)
-		},
+		}),
 	)
 }
 
