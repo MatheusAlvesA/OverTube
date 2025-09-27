@@ -395,7 +395,7 @@ func renderYoutubeChannelInput(
 										clip.Rect{
 											Max: image.Point{
 												X: gtx.Constraints.Max.X,
-												Y: 20,
+												Y: gtx.Dp(unit.Dp(20)),
 											},
 										}.Op(),
 									)
@@ -523,7 +523,7 @@ func renderTwichChannelInput(
 										clip.Rect{
 											Max: image.Point{
 												X: gtx.Constraints.Max.X,
-												Y: 20,
+												Y: gtx.Dp(unit.Dp(20)),
 											},
 										}.Op(),
 									)
@@ -640,11 +640,11 @@ func renderCustomSectionLineSeparator(gtx layC, theme *material.Theme) layD {
 					clip.Rect{
 						Max: image.Point{
 							X: gtx.Constraints.Max.X,
-							Y: 2,
+							Y: gtx.Dp(unit.Dp(2)),
 						},
 					}.Op(),
 				)
-				return layout.Dimensions{Size: image.Pt(gtx.Constraints.Max.X, 2)}
+				return layout.Dimensions{Size: image.Pt(gtx.Constraints.Max.X, gtx.Dp(unit.Dp(2)))}
 			})
 		}),
 	)
