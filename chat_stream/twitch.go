@@ -239,10 +239,19 @@ func parseTwMessage(con *TWChatStreamCon, message string) (*ChatStreamMessage, e
 		timestamp = int(time.Now().Unix())
 	}
 
+	parts, err := parseMessageParts(data["message"], data["emotes"])
+	if err != nil {
+		log.Println("Error parsing message parts:", err)
+		log.Println("Raw Message:", message)
+		log.Println("Emotes:", data["emotes"])
+		log.Println("Message:", data["message"])
+		return nil, err
+	}
+
 	res := &ChatStreamMessage{
 		Platform:     PlatformTypeTwitch,
 		Name:         data["display-name"],
-		MessageParts: partMessageParts(data["message"], data["emotes"]),
+		MessageParts: parts,
 		Timestamp:    int64(timestamp / 1000),
 		Badges:       parseBadges(con, data),
 	}
@@ -250,10 +259,10 @@ func parseTwMessage(con *TWChatStreamCon, message string) (*ChatStreamMessage, e
 	return res, nil
 }
 
-func partMessageParts(message string, emotes string) []ChatStreamMessagePart {
+func parseMessageParts(message string, emotes string) ([]ChatStreamMessagePart, error) {
 	parts := []ChatStreamMessagePart{}
 	if message == "" {
-		return parts
+		return parts, nil
 	}
 
 	if emotes == "" {
@@ -261,7 +270,7 @@ func partMessageParts(message string, emotes string) []ChatStreamMessagePart {
 			PartType: ChatStreamMessagePartTypeText,
 			Text:     message,
 		})
-		return parts
+		return parts, nil
 	}
 
 	emoteRawList := strings.Split(emotes, "/")
@@ -296,6 +305,10 @@ func partMessageParts(message string, emotes string) []ChatStreamMessagePart {
 				continue
 			}
 
+			if start > len(message) {
+				return nil, &CustomError{message: "Emote start position(" + strconv.Itoa(start) + ") is greater than message length(" + strconv.Itoa(len(message)) + ")"}
+			}
+
 			emoteParsedList = append(emoteParsedList, map[string]any{
 				"start": start,
 				"end":   end,
@@ -318,8 +331,7 @@ func partMessageParts(message string, emotes string) []ChatStreamMessagePart {
 		end := emoteData["end"].(int)
 
 		if start < cursor {
-			log.Println("Emote start position is less than cursor, skipping:", start, cursor)
-			continue
+			return nil, &CustomError{message: "Emote start position is less than cursor:" + strconv.Itoa(start) + " < " + strconv.Itoa(cursor)}
 		}
 		if start > cursor {
 			parts = append(parts, ChatStreamMessagePart{
@@ -338,7 +350,7 @@ func partMessageParts(message string, emotes string) []ChatStreamMessagePart {
 		})
 	}
 
-	return parts
+	return parts, nil
 }
 
 func parseBadges(con *TWChatStreamCon, metaData map[string]string) []ChatUserBadge {
@@ -370,7 +382,7 @@ func explodeTwMessage(message string) (map[string]string, error) {
 		return nil, &CustomError{"Invalid message format, no ';' found"}
 	}
 	res := make(map[string]string)
-	res["message"] = strings.Split(parts[1], ":")[1]
+	res["message"] = strings.Join(strings.Split(parts[1], ":")[1:], ":")
 
 	for _, line := range metaData {
 		currentEntry := strings.Split(line, "=")
