@@ -29,11 +29,21 @@ func GetChatStyleOptions() []ChatStyleOption {
 		},
 		{
 			Id:    5,
+			Label: "Tortinho",
+			CSS:   getCss("tortinho"),
+		},
+		{
+			Id:    6,
+			Label: "Transparente",
+			CSS:   getCss("transparente"),
+		},
+		{
+			Id:    7,
 			Label: "Simples",
 			CSS:   getCss("simple"),
 		},
 		{
-			Id:    6,
+			Id:    8,
 			Label: "Simples chique",
 			CSS:   getCss("simple-chic"),
 		},

@@ -1,0 +1,110 @@
+*, :after, :before {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: rgba(0, 0, 0, 0);
+    font-family: "Times New Roman", Times, serif;
+}
+
+#alert-disconnected {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    left: calc(50% - 20px);
+    bottom: 10px;
+    border-radius: 50px;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+#alert-disconnected>span {
+    font-size: 20px;
+    margin-bottom: 5px;
+    margin-left: 2px;
+}
+
+.message-emote-img {
+    height: 25px;
+    width: auto;
+    vertical-align: middle;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.message-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.message-head-container {
+    max-width: 50%;
+    padding: 6px;
+    background-color: #19183B;
+    color: white;
+    font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    border-radius: 6px;
+    border: 1px solid #708993;
+}
+
+.message-body-container {
+    padding: 10px;
+    background-color: #19183BA0;
+    color: white;
+    word-wrap: break-word;
+    font-size: 18px;
+    border-radius: 6px;
+    text-shadow: 0px 0px 4px #000000;
+}
+
+.message-head-badges-container {
+    display: inline-flex;
+    align-items: start;
+    gap: 5px;
+    margin-right: 5px;
+}
+
+.message-badge-img {
+    height: 20px;
+}
+
+.message-head-name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.message-footer-container {
+    text-align: end;
+    position: relative;
+    height: 0px;
+    overflow: visible;
+    top: -10px;
+}
+
+.platform-icon-img {
+    width: 20px;
+}
+
+.message-header-platform-icon-container {
+    display: none;
+}
+
+.message-outer-platform-icon-container {
+    display: none;
+}
+
