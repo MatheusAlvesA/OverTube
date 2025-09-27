@@ -1,0 +1,111 @@
+*, :after, :before {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: rgba(0, 0, 0, 0);
+    font-family: Calibri;
+}
+
+#alert-disconnected {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    left: calc(50% - 20px);
+    bottom: 10px;
+    border-radius: 50px;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+#alert-disconnected>span {
+    font-size: 20px;
+    margin-bottom: 5px;
+    margin-left: 2px;
+}
+
+.message-emote-img {
+    height: 25px;
+    width: auto;
+    vertical-align: middle;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.message-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.message-head-container {
+    max-width: 50%;
+    padding: 6px;
+    background-color: #27548A;
+    border-radius: 4px 12px 12px 12px;
+    color: white;
+    font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.message-body-container {
+    width: 100%;
+    padding: 10px;
+    background-color: #F1E7E7;
+    border-radius: 4px 12px 12px 12px;
+    color: black;
+    word-wrap: break-word;
+    font-size: 18px;
+    border: 2px solid #27548A;
+}
+
+.message-head-badges-container {
+    display: inline-flex;
+    align-items: start;
+    gap: 5px;
+    margin-right: 5px;
+}
+
+.message-badge-img {
+    height: 20px;
+}
+
+.message-head-name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.message-footer-container {
+    width: 100%;
+    text-align: end;
+    position: relative;
+    height: 0px;
+    overflow: visible;
+    top: -10px;
+}
+
+.platform-icon-img {
+    width: 20px;
+}
+
+.message-header-platform-icon-container {
+    display: none;
+}
+
+.message-outer-platform-icon-container {
+    display: none;
+}
+
