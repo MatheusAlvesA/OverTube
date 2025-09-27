@@ -9,21 +9,26 @@ func GetChatStyleOptions() []ChatStyleOption {
 	return []ChatStyleOption{
 		{
 			Id:    1,
-			Label: "Default",
+			Label: "Padrão",
 			CSS:   getCss("default"),
 		},
 		{
 			Id:    2,
+			Label: "Goiaba",
+			CSS:   getCss("goiaba"),
+		},
+		{
+			Id:    3,
 			Label: "Preto e branco",
 			CSS:   getCss("black-and-white"),
 		},
 		{
-			Id:    3,
+			Id:    4,
 			Label: "Simples",
 			CSS:   getCss("simple"),
 		},
 		{
-			Id:    4,
+			Id:    5,
 			Label: "Simples chique",
 			CSS:   getCss("simple-chic"),
 		},
