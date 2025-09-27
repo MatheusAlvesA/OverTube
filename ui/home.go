@@ -80,10 +80,12 @@ func initialState() *UIState {
 
 func readAppState(state *UIState, appState save_state.AppState) {
 	if len(appState.YoutubeChannel) > 0 {
+		state.YoutubeChannelURLEditor.SetText(appState.YoutubeChannel)
 		state.YoutubeChannelSet = appState.YoutubeChannel
 		state.YoutubeChannelWasConnected = true
 	}
 	if len(appState.TwitchChannel) > 0 {
+		state.TwitchChannelURLEditor.SetText(appState.TwitchChannel)
 		state.TwitchChannelSet = appState.TwitchChannel
 		state.TwitchChannelWasConnected = true
 	}
@@ -455,7 +457,7 @@ func renderTwichChannelInput(
 		submitUI.Text = "Remover"
 	}
 
-	if state.TwitchChannelURLEditor.Text() == "" {
+	if editor.Text() == "" {
 		submitUI.Background = color.NRGBA{R: 200, G: 200, B: 200, A: 255}
 		submitUI.Color = color.NRGBA{R: 100, G: 100, B: 100, A: 255}
 	}
