@@ -384,6 +384,27 @@ func explodeTwMessage(message string) (map[string]string, error) {
 	res := make(map[string]string)
 	res["message"] = strings.Join(strings.Split(parts[1], ":")[1:], ":")
 
+	if strings.HasPrefix(res["message"], "\x01ACTION") {
+		// Encontra a posição do segundo 0x01 após o início da mensagem
+		messageBytes := []byte(res["message"])
+		second0x01Pos := -1
+
+		// Procura pelo segundo 0x01 (o primeiro já está na posição 0)
+		for i := 1; i < len(messageBytes); i++ {
+			if messageBytes[i] == 0x01 {
+				second0x01Pos = i
+				break
+			}
+		}
+
+		if second0x01Pos == -1 {
+			second0x01Pos = len(messageBytes)
+		}
+
+		// Extrai o conteúdo entre "ACTION" até o segundo 0x01
+		res["message"] = res["message"][8:second0x01Pos]
+	}
+
 	for _, line := range metaData {
 		currentEntry := strings.Split(line, "=")
 		if len(currentEntry) != 2 {
