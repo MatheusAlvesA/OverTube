@@ -38,6 +38,7 @@ func CreateHomeWindow(uiEvents chan<- UIEvent, uiCommands <-chan UICommand, appS
 		window := &app.Window{}
 		window.Option(app.Title("OverTube"))
 		window.Option(app.MinSize(400, 300))
+		window.Option(app.Size(800, 640))
 		err := run(window, uiEvents, uiCommands, appState)
 		uiEvents <- UIEventExit{err: err}
 		close(uiEvents)
