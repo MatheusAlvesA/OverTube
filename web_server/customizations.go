@@ -24,11 +24,16 @@ func GetChatStyleOptions() []ChatStyleOption {
 		},
 		{
 			Id:    4,
+			Label: "Quadrado",
+			CSS:   getCss("quadrado"),
+		},
+		{
+			Id:    5,
 			Label: "Simples",
 			CSS:   getCss("simple"),
 		},
 		{
-			Id:    5,
+			Id:    6,
 			Label: "Simples chique",
 			CSS:   getCss("simple-chic"),
 		},
