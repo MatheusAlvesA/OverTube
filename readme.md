@@ -14,7 +14,7 @@ Algumas caracteristicas do OverTube:
 10. Feedback em tempo real sobre se a conexão com o chat está ativa ou caiu
 
 ## Como baixar
-Sendo um programa de código fonte aberto, essa página tem todo o código fonte do projeto, mas se você apenas deseja baixar e usar, basta clicar nesse link para acessar a versão mais recente: [v0.9.0](https://https://github.com/MatheusAlvesA/OverTube/releases/tag/v0.9.0) e então clique no link OverTube.exe
+Sendo um programa de código fonte aberto, essa página tem todo o código fonte do projeto, mas se você apenas deseja baixar e usar, basta clicar nesse link para acessar a versão mais recente: [v0.9.0](https://github.com/MatheusAlvesA/OverTube/releases/tag/v0.9.0) e então clique no link OverTube.exe
 
 ## Como usar
 O OverTube tem foco em ser simples de usar. Ao baixar o programa não é necessário instalar, basta abrir e ele já vai estar pronto. Como esse programa foi desenvolvido recentemente, ele pode ser considerado estranho para seu antivirus. Isso não é um indicativo de virus é apenas uma preucalção do anti-virus em não executar arquivos desconhecidos. Adicione uma exeção para o OverTube e execute. Se o bloqueio for a tela do Windows com título: O Windoes protegeu o computador, então apenas clique em "Maos informações" e depois em "Executar mesmo assim".
