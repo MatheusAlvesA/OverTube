@@ -20,7 +20,7 @@ Sendo um programa de código fonte aberto, essa página tem todo o código fonte
 O OverTube tem foco em ser simples de usar. Ao baixar o programa não é necessário instalar, basta abrir e ele já vai estar pronto. Como esse programa foi desenvolvido recentemente, ele pode ser considerado estranho para seu antivirus. Isso não é um indicativo de virus é apenas uma precaução do anti-virus em não executar arquivos desconhecidos. Adicione uma exceção para o OverTube e execute. Se o bloqueio for a tela do Windows com título: "O Windows protegeu o computador", então apenas clique em "Mais informações" e depois em "Executar mesmo assim".
 
 ### Usando de forma básica
-![Usar 1](doc/print_01.png)
+![Usar 1](doc/uso_01.gif)
 OverTube só tem uma tela, não existem outros menus. Preencha seu canal do Youtube e/ou Twitch e então clique em definir. Verifique se os indicadores, que estavam vermelhos, ficam verdes.  
 A seguir clique em "Copiar link para o chat (combinado)", com o link copiado vá até seu programa de transmissão e adicione uma nova fonte do tipo navegador/web e cole o link que acabou de copiar.  
 O chat já está configurado e pronto para usar, da próxima vez que abrir o programa, os canais já vão estar preenchidos e não será necessário fazer nada.  
