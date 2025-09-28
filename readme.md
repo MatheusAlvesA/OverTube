@@ -20,7 +20,7 @@ Sendo um programa de código fonte aberto, essa página tem todo o código fonte
 O OverTube tem foco em ser simples de usar. Ao baixar o programa não é necessário instalar, basta abrir e ele já vai estar pronto. Como esse programa foi desenvolvido recentemente, ele pode ser considerado estranho para seu antivirus. Isso não é um indicativo de virus é apenas uma precaução do anti-virus em não executar arquivos desconhecidos. Adicione uma exceção para o OverTube e execute. Se o bloqueio for a tela do Windows com título: "O Windows protegeu o computador", então apenas clique em "Mais informações" e depois em "Executar mesmo assim".
 
 ### Usando de forma básica
-![print 1](https://raw.githubusercontent.com/MatheusAlvesA/OverTube/refs/heads/main/doc/uso_01.gif?token=GHSAT0AAAAAADJA4RRU7MISHUAVGKFHSEUK2GZJW3Q)
+![Usar 1](doc/print_01.png)
 OverTube só tem uma tela, não existem outros menus. Preencha seu canal do Youtube e/ou Twitch e então clique em definir. Verifique se os indicadores, que estavam vermelhos, ficam verdes.  
 A seguir clique em "Copiar link para o chat (combinado)", com o link copiado vá até seu programa de transmissão e adicione uma nova fonte do tipo navegador/web e cole o link que acabou de copiar.  
 O chat já está configurado e pronto para usar, da próxima vez que abrir o programa, os canais já vão estar preenchidos e não será necessário fazer nada.  
@@ -29,7 +29,7 @@ Se quiser, explore os botões de customização para ver qual modelo te agrada m
 ### Usando de forma completa
 Agora que já entendeu o básico de como o OverTube funciona, vamos entender todo o resto, essa parte é totalmente opcional, mas é recomendada se quiser customizar melhor o seu chat.  
 Observe a imagem a seguir. Existem áreas marcadas e numeradas, em seguida cada um dos pontos enumerados serão explicados.  
-![print 1](https://raw.githubusercontent.com/MatheusAlvesA/OverTube/refs/heads/main/doc/print_01.png?token=GHSAT0AAAAAADJA4RRU7MISHUAVGKFHSEUK2GZJW3Q)
+![print 1](doc/print_01.png)
 1. Está é a versão do seu OverTube, é um botão que quando clicado leva para a página do projeto onde você pode verificar por atualizações.
 2. Aqui você preenche seus canais, não preencha o link do canal nem simbolos como @, apenas preencha o nome/username do canal na plataforma. O pequeno circulo vermelho indica o status da conexão.
 3. Esses são os botões para copiar o link que será colado no seu OBS. O da esquerda é o principal, mas é possível copiar links que exibem chats exclusivos de uma plataforma. Usando esses botões você pode ter mais de um chat na tela e separar por plataforma.
