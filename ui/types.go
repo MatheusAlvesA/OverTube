@@ -89,6 +89,10 @@ type UIState struct {
 
 	CopyLinkToChatClickable *widget.Clickable
 	CopyLinkToChatCopied    bool
+	CopyLinkToYTClickable   *widget.Clickable
+	CopyLinkToTwClickable   *widget.Clickable
+	CopyLinkToYTClicked     bool
+	CopyLinkToTwClicked     bool
 
 	VersionClickable *widget.Clickable
 

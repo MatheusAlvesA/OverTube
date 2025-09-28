@@ -1,6 +1,12 @@
 var socket = null;
 var twEmoteMap = new Map();
 var ytEmoteMap = new Map();
+var platform = null;
+
+window.addEventListener('load', () => {
+    const queryParams = new URLSearchParams(window.location.search);
+    platform = queryParams.get('platform');
+});
 
 function openWebSocket() {
     if(socket != null) return;
@@ -57,9 +63,11 @@ function handleNewCommand(command) {
 function handleNewMessage(message) {
     switch (message.platform) {
         case 'youtube':
+            if(platform !== null && platform !== 'youtube') return;
             breakMessage(message, ytEmoteMap);
             break;
         case 'twitch':
+            if(platform !== null && platform !== 'twitch') return;
             breakMessage(message, twEmoteMap);
             break;
         default:

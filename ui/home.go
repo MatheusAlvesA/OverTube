@@ -38,7 +38,7 @@ func CreateHomeWindow(uiEvents chan<- UIEvent, uiCommands <-chan UICommand, appS
 		window := &app.Window{}
 		window.Option(app.Title("OverTube"))
 		window.Option(app.MinSize(400, 300))
-		window.Option(app.Size(800, 640))
+		window.Option(app.Size(800, 660))
 		err := run(window, uiEvents, uiCommands, appState)
 		uiEvents <- UIEventExit{err: err}
 		close(uiEvents)
@@ -62,6 +62,8 @@ func initialState() *UIState {
 	state.TwitchChannelClickable = &widget.Clickable{}
 
 	state.CopyLinkToChatClickable = &widget.Clickable{}
+	state.CopyLinkToYTClickable = &widget.Clickable{}
+	state.CopyLinkToTwClickable = &widget.Clickable{}
 	state.VersionClickable = &widget.Clickable{}
 	state.ConfirmCSSClickable = &widget.Clickable{}
 	state.RevertCSSClickable = &widget.Clickable{}
@@ -242,6 +244,24 @@ func emitEvents(gtx layC, state *UIState, uiEvents chan<- UIEvent) {
 		}()
 	}
 
+	if state.CopyLinkToYTClickable.Clicked(gtx) {
+		gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader("http://localhost:1337?platform=youtube"))})
+		state.CopyLinkToYTClicked = true
+		go func() {
+			time.Sleep(time.Second * 2)
+			state.CopyLinkToYTClicked = false
+		}()
+	}
+
+	if state.CopyLinkToTwClickable.Clicked(gtx) {
+		gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader("http://localhost:1337?platform=twitch"))})
+		state.CopyLinkToTwClicked = true
+		go func() {
+			time.Sleep(time.Second * 2)
+			state.CopyLinkToTwClicked = false
+		}()
+	}
+
 	if state.ConfirmCSSClickable.Clicked(gtx) {
 		uiEvents <- SetChatStyleCustomCSS{
 			Id:  state.ChatStyleId,
@@ -263,6 +283,8 @@ func emitEvents(gtx layC, state *UIState, uiEvents chan<- UIEvent) {
 	if state.YouTubeChannelClickable.Hovered() ||
 		state.TwitchChannelClickable.Hovered() ||
 		state.CopyLinkToChatClickable.Hovered() ||
+		state.CopyLinkToYTClickable.Hovered() ||
+		state.CopyLinkToTwClickable.Hovered() ||
 		state.VersionClickable.Hovered() {
 		pointer.CursorPointer.Add(gtx.Ops)
 	}
@@ -292,7 +314,7 @@ func renderTitle(gtx layC, theme *material.Theme, state *UIState) layD {
 		title.Color = maroon
 		title.Alignment = text.Start
 
-		labelVersion := material.Label(theme, unit.Sp(12), "Versão 0.8.0")
+		labelVersion := material.Label(theme, unit.Sp(12), "Versão 0.9.0")
 		if state.VersionClickable.Hovered() {
 			labelVersion.Color = color.NRGBA{R: 0, G: 0, B: 255, A: 255}
 		} else {
@@ -575,10 +597,18 @@ func renderBtnCopyLinkToChat(
 	theme *material.Theme,
 	state *UIState,
 ) layD {
-	btnUI := material.Button(theme, state.CopyLinkToChatClickable, "Copiar link para o chat")
+	btnUI := material.Button(theme, state.CopyLinkToChatClickable, "Copiar link para o chat (Combinado)")
+	btnUIYT := material.Button(theme, state.CopyLinkToYTClickable, "Copiar link para o chat (YouTube)")
+	btnUITW := material.Button(theme, state.CopyLinkToTwClickable, "Copiar link para o chat (Twitch)")
 
 	if state.CopyLinkToChatCopied {
 		btnUI.Text = "Copiado!"
+	}
+	if state.CopyLinkToYTClicked {
+		btnUIYT.Text = "Copiado!"
+	}
+	if state.CopyLinkToTwClicked {
+		btnUITW.Text = "Copiado!"
 	}
 
 	return layout.Inset{
@@ -587,25 +617,23 @@ func renderBtnCopyLinkToChat(
 		Right:  unit.Dp(16),
 		Bottom: unit.Dp(16),
 	}.Layout(gtx, func(gtx layC) layD {
-		return layout.Flex{
-			Axis:      layout.Horizontal,
-			Spacing:   layout.SpaceBetween,
-			Alignment: layout.Middle,
-		}.Layout(
+		return Flow{Spacing: unit.Dp(8)}.Layout(
 			gtx,
-			layout.Rigid(
-				func(gtx layC) layD {
-					return layout.Inset{Left: unit.Dp(8)}.Layout(
-						gtx,
-						func(gtx layC) layD {
-							// Define largura fixa para o botão
-							gtx.Constraints.Min.X = gtx.Dp(unit.Dp(200))
-							gtx.Constraints.Max.X = gtx.Dp(unit.Dp(200))
-							return btnUI.Layout(gtx)
-						},
-					)
-				},
-			),
+			func(gtx layC) layD {
+				gtx.Constraints.Min.X = gtx.Dp(unit.Dp(200))
+				gtx.Constraints.Max.X = gtx.Dp(unit.Dp(200))
+				return btnUI.Layout(gtx)
+			},
+			func(gtx layC) layD {
+				gtx.Constraints.Min.X = gtx.Dp(unit.Dp(200))
+				gtx.Constraints.Max.X = gtx.Dp(unit.Dp(200))
+				return btnUIYT.Layout(gtx)
+			},
+			func(gtx layC) layD {
+				gtx.Constraints.Min.X = gtx.Dp(unit.Dp(200))
+				gtx.Constraints.Max.X = gtx.Dp(unit.Dp(200))
+				return btnUITW.Layout(gtx)
+			},
 		)
 	})
 }

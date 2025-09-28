@@ -7,6 +7,8 @@ import (
 	"reflect"
 )
 
+const STATE_FILE_NAME = "overtube_state.json"
+
 func Save(data *AppState) bool {
 	dataJson, err := json.Marshal(data)
 	if err != nil {
@@ -14,7 +16,7 @@ func Save(data *AppState) bool {
 		return false
 	}
 
-	err = os.WriteFile("state.json", dataJson, 0666)
+	err = os.WriteFile(STATE_FILE_NAME, dataJson, 0666)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -31,7 +33,7 @@ func Read() *AppState {
 		ChatStyleCustomCSSs: []ChatStyleCustomCSS{},
 	}
 
-	dataJson, err := os.ReadFile("state.json")
+	dataJson, err := os.ReadFile(STATE_FILE_NAME)
 	if err != nil {
 		log.Println("[save_state::Read] Fail to read file", err)
 		return defaultState
