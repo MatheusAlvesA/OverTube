@@ -1,3 +1,43 @@
+.message-outer-platform-icon-container {
+    background-color: #FD3838;
+    
+    border-radius: 12px 0px 0px 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2px;
+    margin-right: 5px;
+}
+
+.message-container {
+    background-color: white;
+
+    display: inline-flex;
+    align-items: stretch;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+    flex-direction: row;
+    max-width: 100%;
+    border-radius: 12px;
+}
+
+.message-head-container {
+    color: black;
+    font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-right: 5px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-shrink: 0;
+    max-width: 40vw;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 20px;
+}
+
 *, :after, :before {
     box-sizing: border-box;
 }
@@ -42,33 +82,6 @@ body {
     margin-right: 5px;
 }
 
-.message-container {
-    display: inline-flex;
-    align-items: stretch;
-    justify-content: flex-start;
-    margin-bottom: 10px;
-    flex-direction: row;
-    max-width: 100%;
-    background-color: white;
-    border-radius: 12px;
-}
-
-.message-head-container {
-    color: black;
-    font-weight: bold;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    margin-right: 5px;
-    display: flex;
-    justify-content: start;
-    align-items: center;
-    flex-shrink: 0;
-    max-width: 40vw;
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
 .message-head-container::after {
     content: ": ";
 }
@@ -76,8 +89,8 @@ body {
 .message-body-container {
     color: black;
     word-wrap: break-word;
-    font-size: 18px;
-    line-height: 18px;
+    font-size: 22px;
+    line-height: 22px;
     margin-top: 5px;
     margin-bottom: 5px;
     margin-right: 10px;
@@ -112,16 +125,6 @@ body {
 
 .message-header-platform-icon-container {
     display: none;
-}
-
-.message-outer-platform-icon-container {
-    background-color: #FD3838;
-    border-radius: 12px 0px 0px 12px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2px;
-    margin-right: 5px;
 }
 
 .outer-platform-icon-img {

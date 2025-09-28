@@ -1,3 +1,32 @@
+.message-head-container {
+    background-color: #27548A;
+
+    max-width: 50%;
+    padding: 6px;
+    border-radius: 4px 12px 12px 12px;
+    color: white;
+    font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.message-body-container {
+    background-color: #F1E7E7;
+    border: 2px solid #27548A;
+
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px 12px 12px 12px;
+    color: black;
+    word-wrap: break-word;
+    font-size: 22px;
+}
+
+
 *, :after, :before {
     box-sizing: border-box;
 }
@@ -42,33 +71,6 @@ body {
     justify-content: center;
     width: 100%;
     margin-bottom: 10px;
-}
-
-.message-head-container {
-    max-width: 50%;
-    padding: 6px;
-    background-color: #27548A;
-    border-radius: 4px 12px 12px 12px;
-    color: white;
-    font-weight: bold;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-
-    display: flex;
-    justify-content: start;
-    align-items: center;
-}
-
-.message-body-container {
-    width: 100%;
-    padding: 10px;
-    background-color: #F1E7E7;
-    border-radius: 4px 12px 12px 12px;
-    color: black;
-    word-wrap: break-word;
-    font-size: 18px;
-    border: 2px solid #27548A;
 }
 
 .message-head-badges-container {

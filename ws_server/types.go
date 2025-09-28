@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-const MAX_WS_CONNS = 5
+const MAX_WS_CONNS = 10
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -56,7 +56,7 @@ type WSChatStreamServer struct {
 }
 
 func (s *WSChatStreamServer) Start() bool {
-	s.srv = &http.Server{Addr: "localhost:" + fmt.Sprintf("%d", s.Port)}
+	s.srv = &http.Server{Addr: "127.0.0.1:" + fmt.Sprintf("%d", s.Port)}
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		if len(s.srcStreams) <= 0 {
 			log.Println("[WSChatStreamServer] Denying new connection, no chat stream live")

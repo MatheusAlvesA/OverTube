@@ -1,3 +1,28 @@
+.message-head-container {
+    background-color: #84994F;
+
+    max-width: 50%;
+    padding: 6px;
+    color: white;
+    font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.message-body-container {
+    background-color: #BDE3C3;
+
+    padding: 10px;
+    color: black;
+    word-wrap: break-word;
+    font-size: 22px;
+}
+
+
 *, :after, :before {
     box-sizing: border-box;
 }
@@ -42,29 +67,6 @@ body {
     justify-content: center;
     width: 100%;
     margin-bottom: 10px;
-}
-
-.message-head-container {
-    max-width: 50%;
-    padding: 6px;
-    background-color: #84994F;
-    color: white;
-    font-weight: bold;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-
-    display: flex;
-    justify-content: start;
-    align-items: center;
-}
-
-.message-body-container {
-    padding: 10px;
-    background-color: #BDE3C3;
-    color: black;
-    word-wrap: break-word;
-    font-size: 18px;
 }
 
 .message-head-badges-container {

@@ -1,3 +1,35 @@
+.message-head-container {
+    background-color: #F8F7BA;
+
+    max-width: 50%;
+    padding: 6px;
+    color: black;
+    font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    border-radius: 12px;
+    transform: rotate(-5deg);
+    position: relative;
+    bottom: -10px;
+    z-index: 10;
+}
+
+.message-body-container {
+    background-color: #F5EFE6;
+
+    padding: 10px;
+    color: black;
+    word-wrap: break-word;
+    font-size: 18px;
+    transform: rotate(-2deg);
+    border-radius: 22px;
+}
+
+
 *, :after, :before {
     box-sizing: border-box;
 }
@@ -42,36 +74,6 @@ body {
     justify-content: center;
     width: 100%;
     margin-bottom: 10px;
-}
-
-.message-head-container {
-    max-width: 50%;
-    padding: 6px;
-    background-color: #F8F7BA;
-    color: black;
-    font-weight: bold;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-
-    display: flex;
-    justify-content: start;
-    align-items: center;
-    border-radius: 12px;
-    transform: rotate(-5deg);
-    position: relative;
-    bottom: -10px;
-    z-index: 10;
-}
-
-.message-body-container {
-    padding: 10px;
-    background-color: #F5EFE6;
-    color: black;
-    word-wrap: break-word;
-    font-size: 18px;
-    transform: rotate(-2deg);
-    border-radius: 12px;
 }
 
 .message-head-badges-container {
